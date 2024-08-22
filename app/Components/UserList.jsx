@@ -146,8 +146,16 @@ function UserList({selectedUser,setSelectedUser}) {
                        (msg.from === EmailUser && msg.to === userDetail.email) || 
                        (msg.to === EmailUser && msg.from === userDetail.email)
                      )
-                   ).map((User, i) => (
-                     <div
+                   ).map((User, i) => {
+                    // Find the last message between EmailUser and the current User
+                       const lastMessage = messages
+                       .filter(msg => 
+                         (msg.from === EmailUser && msg.to === User.email) || 
+                         (msg.to === EmailUser && msg.from === User.email)
+                       )
+                       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]; 
+                     return(
+                      <div
                        key={i}
                        onClick={() => {
                          setSelectedUser(User);
@@ -166,7 +174,7 @@ function UserList({selectedUser,setSelectedUser}) {
                          selectedUser && selectedUser.email === User.email ? 'bg-gray-700' : ''
                        }`}
                      >       
-                       <div className="relative w-12 h-12">
+                       <div className="relative flex-shrink-0 w-12 h-12">
                          <Image
                            src={User.urlimage}
                            alt="Profile"
@@ -176,10 +184,14 @@ function UserList({selectedUser,setSelectedUser}) {
                        </div>
                        <div className='flex flex-col'>
                          <p className="text-lg">{User.fullname}</p>
-                         <p className="text-[10px] text-gray-500">{User.email}</p>
+                         {/* <p className="text-[10px] text-gray-500">{User.email}</p> */}
+                         <p className="text-[12px] text-gray-500 line-clamp-1">
+                           {lastMessage ? lastMessage.message : "No messages yet"}
+                         </p>
                        </div>
                      </div>
-                   ))
+                     )
+                   })
                  }
                 </div>       
                 </div>
