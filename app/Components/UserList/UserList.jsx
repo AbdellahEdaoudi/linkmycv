@@ -2,29 +2,32 @@
 import axios from "axios";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { MyContext } from "../../Context/MyContext";
 import io from "socket.io-client";
 
 function UserList({ selectedUser, setSelectedUser }) {
-  const [userByEmail, setuserByEmail] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const messagesEndRef = useRef(null);
-  const lodd = Array.from({ length: 10 }, (_, index) => index + 1);
-  const {
-    EmailUser,
-    SERVER_URL_V,
-    SERVER_URL,
-    userDetails,
-    messages,
-    setMessages,friendRequests, setFriendRequests
-  } = useContext(MyContext);
+  const {userDetails,EmailUser,SERVER_URL_V,SERVER_URL}=useContext(MyContext);
+  const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
-
+  const [searchQuery,setSearchQuery] = useState("");
+  const messagesEndRef = useRef(null);
+  
+  // getMessages
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const response = await axios.get(`${SERVER_URL_V}/messages`);
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    getMessages();
+  }, [SERVER_URL_V]);
+  // socket
   useEffect(() => {
     const socket = io(SERVER_URL);
     setSocket(socket);
-
     socket.on("receiveMessage", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
@@ -40,29 +43,15 @@ function UserList({ selectedUser, setSelectedUser }) {
         prevMessages.filter((msg) => msg._id !== deletedMessageId)
       );
     });
-
-    socket.on("receiveFriendRequest", (newRequest) => {
-      setFriendRequests((prevRequests) => [...prevRequests, newRequest]);
-    });
-
-    socket.on("receiveUpdatedFriendRequest", (updatedRequest) => {
-      setFriendRequests((prevRequests) =>
-        prevRequests.map((request) =>
-          request._id === updatedRequest._id ? updatedRequest : request
-        )
-      );
-    });
-
-    socket.on("receiveDeletedFriendRequest", (deletedRequestId) => {
-      setFriendRequests((prevRequests) =>
-        prevRequests.filter((request) => request._id !== deletedRequestId)
-      );
-    });
-
     return () => {
       socket.disconnect();
     };
   }, [SERVER_URL]);
+  const LiseMessages = messages.filter((message, index, self) =>
+    index === self.findIndex((m) => m.from === message.from)
+  );
+
+
 
   const ReadOrNo = async (fromEmail,toEmail) => {
     try {
@@ -83,117 +72,78 @@ function UserList({ selectedUser, setSelectedUser }) {
   // Define the function to handle user clicks
   const UserClick = async (User, lastMessage) => {
     setSelectedUser(User);
-
+    localStorage.setItem("SelectedUser", JSON.stringify(User));
     if (lastMessage && lastMessage.from && lastMessage.to) {
       // Check if lastMessage.readorno is false
       if (lastMessage.readorno === false) {
           try {
-              await ReadOrNo(lastMessage.from, lastMessage.to);
-              console.log("successful");
+              const response = await ReadOrNo(lastMessage.from, lastMessage.to);
+              console.log("Read successful");
+              socket.emit("updateMessage", response);
           } catch (error) {
               console.error("Error updating readorno:", error);
           }
       }
-  } else {
+    } else {
       console.warn("lastMessage or its properties are undefined");
-  }
+    }
 
-    // Store selected user in localStorage
-    localStorage.setItem("SelectedUser", JSON.stringify(User));
-    
     // Scroll messages to the end
     const scrollMessagesToEnd = () => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
         }
     };
-    
     const timeout = setTimeout(() => {
         scrollMessagesToEnd();
     }, 1);
-    
     return () => clearTimeout(timeout);
-};
-
-
-  //  search input change
-  const SearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-  // Scroll To End
-  useEffect(() => {
-    const scrollMessagesToEnd = () => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-      }
     };
-    const timeout = setTimeout(() => {
-      scrollMessagesToEnd();
-    }, 1);
-    return () => clearTimeout(timeout);
-  }, [messages]);
-
-  // Get users By Email
-  useEffect(() => {
-    const getUserByEmail = async () => {
-      try {
-        const response = await axios.get(`${SERVER_URL_V}/usersE/${EmailUser}`);
-        setuserByEmail(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (EmailUser) {
-      getUserByEmail();
-    }
-  }, [SERVER_URL_V, EmailUser]);
+    // Scroll To End
+    useEffect(() => {
+      const scrollMessagesToEnd = () => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+        }
+      };
+      const timeout = setTimeout(() => {
+        scrollMessagesToEnd();
+      }, 1);
+      return () => clearTimeout(timeout);
+    }, [messages]);
+    const filteredSearchUser = userDetails
+    .filter(
+      (user) =>
+        user.fullname
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        user.username
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        user.email
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    )
 
   return (
     <div>
       <div className="bg-gray-800 rounded-b-sm text-white scrollbar-none   p-4 overflow-y-auto max-h-[516px] min-h-[525px]">
-        {/* Search input */}
+        {/* Search Users input */}
         <input
           type="search"
           placeholder="Search by Name or Email"
           value={searchQuery}
-          onChange={SearchChange}
+          onChange={(e)=>{setSearchQuery(e.target.value)}}
           className="w-full px-4 py-2 mb-4 rounded-md bg-gray-700 text-white focus:outline-none"
         />
-        {/* Users List */}
+        {/* Search State */}
         <div className="text-lg  border-yellow-500 font-bold mb-4 sticky top-0 border-b py-1 bg-gray-800 z-10">
           {searchQuery === "" ? "Friends" : "Users List"}
         </div>
-        <div className=" overflow-y-auto max-h-[400px] scrollbar-none ">
-          {!userDetails ? (
-            <div className="space-y-2">
-              {lodd.map((l, i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[250px]" />
-                    <Skeleton className="h-4 w-[200px]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>
               {/* Users List */}
+        <div className=" overflow-y-auto max-h-[400px] scrollbar-none ">
               <div className="overflow-y-auto max-h-[420px] scrollbar-none">
-                {userDetails
-                  .filter(
-                    (user) =>
-                      user.fullname
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.username
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.email
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-                  )
-                  .map((User, i) => (
+                {filteredSearchUser.map((User, i) => (
                     <div
                       key={i}
                       onClick={() => {
@@ -213,14 +163,11 @@ function UserList({ selectedUser, setSelectedUser }) {
                         }, 1);
                         return () => clearTimeout(timeout);
                       }}
-                      className={`${
-                        searchQuery === "" ? "hidden" : ""
-                      } flex items-center gap-4 p-2 duration-500 hover:bg-gray-700 cursor-pointer rounded-lg transition ${
-                        selectedUser && selectedUser.email === User.email
-                          ? "bg-gray-700"
-                          : ""
-                      }`}
-                    >
+                      className={`${searchQuery === "" ? "hidden" : ""} 
+                        flex items-center gap-4 p-2 duration-500 hover:bg-gray-700
+                         cursor-pointer rounded-lg transition 
+                         ${selectedUser && selectedUser.email === User.email ? 
+                         "bg-gray-700" : ""}`} >
                       <div className="relative w-12 h-12">
                         <div className="">
                           <Image
@@ -240,9 +187,7 @@ function UserList({ selectedUser, setSelectedUser }) {
                       </div>
                     </div>
                   ))}
-                {EmailUser &&
-                  EmailUser.length > 0 &&
-                  userDetails
+                {EmailUser  && userDetails
                     .filter(
                       (userDetail) =>
                         userDetail.email === EmailUser ||
@@ -267,12 +212,11 @@ function UserList({ selectedUser, setSelectedUser }) {
                         )[0];
 
                       return { User, lastMessage };
-                    })
-                    .sort(
+                    }).sort(
                       (a, b) =>
                         new Date(b.lastMessage?.createdAt) -
                         new Date(a.lastMessage?.createdAt)
-                    ) // Sort by last message date
+                    ) 
                     .map(({ User, lastMessage }, i) => {
                       const MessgesLength = Array.from(
                         new Map(
@@ -341,8 +285,6 @@ function UserList({ selectedUser, setSelectedUser }) {
                       )
 })}
               </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
