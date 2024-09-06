@@ -31,6 +31,7 @@ import QrcodeProfile from "./QrcodeProfile";
 import { languagess } from "../data/language";
 import LoadingPagetranslate from "../Components/Loading/LoadingPagetranslate";
 import { useSession } from "next-auth/react";
+import SocialMedia from "./SocialMedia"
 
 function GetUserByUsername({ params }) {
   const { data, status } = useSession();
@@ -126,75 +127,6 @@ function GetUserByUsername({ params }) {
       </div>
     );
   }
-  const datasocial = [
-    {
-      id: 1,
-      icon: "/Icons/wts.svg",
-      alt: "WhatsApp",
-      link: userDetailsG.whatsapp,
-    },
-    {
-      id: 8,
-      icon: "/Icons/link.svg",
-      alt: "LinkedIn",
-      link: userDetailsG.Linkedin,
-    },
-    {
-      id: 9,
-      icon: "/Icons/github.svg",
-      alt: "GitHub",
-      link: userDetailsG.github,
-    },
-    {
-      id: 11,
-      icon: "/Icons/tele.svg",
-      alt: "Telegram",
-      link: userDetailsG.Telegram,
-    },
-    {
-      id: 2,
-      icon: "/Icons/messenger.svg",
-      alt: "Messenger",
-      link: userDetailsG.messenger,
-    },
-    {
-      id: 6,
-      icon: "/Icons/ins.svg",
-      alt: "Instagram",
-      link: userDetailsG.instagram,
-    },
-    {
-      id: 7,
-      icon: "/Icons/twit.svg",
-      alt: "Twitter",
-      link: userDetailsG.Twitter,
-    },
-    {
-      id: 10,
-      icon: "/Icons/yt.svg",
-      alt: "YouTube",
-      link: userDetailsG.Youtube,
-    },
-    {
-      id: 3,
-      icon: "/Icons/reddit.svg",
-      alt: "Reddit",
-      link: userDetailsG.reddit,
-    },
-    {
-      id: 4,
-      icon: "/Icons/twitch.svg",
-      alt: "Twitch",
-      link: userDetailsG.twitch,
-    },
-    { id: 5, icon: "/Icons/fb.svg", alt: "Facebook", link: userDetailsG.fb },
-    {
-      id: 12,
-      icon: "/Icons/snap.svg",
-      alt: "Snapchat",
-      link: userDetailsG.snapchat,
-    },
-  ];
   const datamodul = [
     {
       name: translatedDetails 
@@ -306,29 +238,17 @@ function GetUserByUsername({ params }) {
     >
       <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
         {/* Image Profile and info user */}
-        <div className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} border flex flex-col md:flex-row md:items-start items-center mb-4 p-4 bg-white rounded-lg shadow-md`}>
-          <div className={`${language === "ar" ? 'ml-4' : ''}`}>
+        <div className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} border flex flex-col md:flex-row md:items-start items-center md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
+          <div className={`${language === "ar" ? 'ml-4' : ''} flex-shrink-0`}>
             <AlertDialog>
               <AlertDialogTrigger>
-                {!userDetailsG.urlimage ? (
-                  <div
-                    width={140}
-                    height={0}
-                    src={"/prifil Loading.png"}
-                    alt="Profile Image"
-                    className="object-cover bg-gray-300 animate-pulse w-32 h-32  cursor-pointer"
-                  />
-                ) : (
-                  <div className="border-4  border-green-600 shadow-lg  rounded-full overflow-hidden mb-4 md:mb-0 md:mr-6 duration-500">
                     <Image
                       width={136}
                       height={0}
                       src={userDetailsG.urlimage}
                       alt="Profile Image"
-                      className="object-cover cursor-pointer"
+                      className="object-cover cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
                     />
-                  </div>
-                )}
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -352,21 +272,21 @@ function GetUserByUsername({ params }) {
             </AlertDialog>
           </div>
           <div className="text-center md:text-left">
-            <h2 className="font-bold text-2xl text-gray-800">
+            <div className="font-bold text-2xl text-gray-800">
               {userDetailsG.fullname}
-            </h2>
-            <p className={`${language === "ar" && "list-disc-ltr"} text-gray-600 flex md:flex-row flex-col items-center gap-2 md:justify-start justify-center   md:gap-2 mt-1`}>
-              <span className={`flex gap-1 ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} text-green-900`}>
+            </div>
+            <div className={`${language === "ar" && "list-disc-ltr"} text-gray-600 flex md:flex-row flex-col items-center md:gap-2 md:justify-start justify-center `}>
+              <div className={`flex gap-1 ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} text-green-900`}>
                 <span>@</span>
                 <span>{userDetailsG.username}</span>
-              </span>
+              </div>
               {userDetailsG.country && (
-                <span className={`flex ${language === "ar" ? 'flex-row-reverse' : 'flex-row'}  flex-row gap-1 justify-center`}>
+                <span className={`flex ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} flex-row justify-center gap-1`}>
                   <MapPin width={18} style={{ color: "red" }} />
                   {`${translatedDetails ? translatedDetails.country : userDetailsG.country}`}
                 </span>
               )}
-            </p>
+            </div>
             {userDetailsG.phoneNumber && (
               <p className={`${language === "ar" && "list-disc-ltr"} text-gray-600 flex ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} items-center justify-center md:justify-start gap-2 mt-1`}>
                 <Phone width={18} style={{ color: "green" }} />
@@ -375,33 +295,13 @@ function GetUserByUsername({ params }) {
             )}
 
             {/* Business Links */}
-            <p className={`${language === "ar" && "text-right"}`}>
+            <div className={`${language === "ar" && "text-right"}`}>
               <UserLinks language={language} setLanguage={setLanguage} emailuser={emailuser} />
-            </p>
-            {/* Social Media */}
-            <div className="flex flex-wrap gap-4 justify-center my-2 ">
-              {datasocial
-                .filter((social) => social.link)
-                .map((social, i) => (
-                  <a
-                    key={i}
-                    href={social.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex hover:scale-105 items-center justify-center bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md shadow-md transition duration-300"
-                  >
-                    <Image
-                      src={social.icon}
-                      alt={social.alt}
-                      width={24}
-                      height={24}
-                    />
-                    {/* <span className="ml-2 text-gray-800 font-medium">{social.alt}</span> */}
-                  </a>
-                ))}
             </div>
-            {/* className={`${userDetails.phoneNumber ? "text-blue-700" : "md:block hidden md:text-white"}`} */}
-            {/* className={`${userDetails.country ? "text-red-700" : " md:block hidden md:text-white"}`} */}
+            {/* Social Media */}
+            <div>
+            <SocialMedia userDetailsG={userDetailsG} />
+            </div>
           </div>
         </div>
         {/* Setting  */}
