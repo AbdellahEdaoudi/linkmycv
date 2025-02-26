@@ -120,74 +120,86 @@ function ProfilePage() {
           return (
             <div key={i} className="relative">
           <ParticleComponent bgcolor={UserF.bgcolorp}/> 
-           <div className={`flex items-start  justify-center   pt-4 pb-20  ${UserF.bgcolorp}  `}>
-            <div className={`w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-6 pb-8 rounded-lg border-2 shadow-lg`} >
+           <div className={`flex items-start  justify-center text-xs md:text-base   pt-4 pb-20  ${UserF.bgcolorp}  `}>
+            <div className={`w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg`} >
               {/* Image Profile and info user */}
-              <div className=" border flex flex-col md:flex-row md:items-start items-center mb-4 p-4 bg-white rounded-lg shadow-md">
-                <div>
-                  <AlertDialog>
-                    <AlertDialogTrigger>
-                      <div className="border-4  border-green-600 shadow-lg  rounded-full overflow-hidden mb-4 md:mb-0 md:mr-6 duration-500">
-                        <Image
-                          width={136}
-                          height={0}
-                          src={UserF.urlimage}
-                          alt="Profile Image"
-                          className="object-cover cursor-pointer"
-                        />
-                      </div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogDescription className="flex justify-center">
-                          <Image
-                            width={400}
-                            height={400}
-                            src={UserF.urlimage}
-                            alt="Profile Image"
-                            className="object-cover rounded-full cursor-pointer"
-                          />
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 duration-300 hover:scale-105">
-                          Cancel
-                        </AlertDialogCancel>
-                        {/* <AlertDialogAction>Continue</AlertDialogAction> */}
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-                <div className="text-center md:text-left">
-                  <h2 className="font-bold text-2xl text-gray-800">
-                    {UserF.fullname}
-                  </h2>
-                  <p className="text-gray-600 flex items-center justify-center md:justify-start gap-2 mt-1">
-                    <span className="text-green-500">
-                      <MailCheck width={18} />
-                    </span>{" "}
-                    {UserF.email}
-                  </p>
-                  <p className="text-gray-600 md:flex items-center justify-center md:justify-start  md:gap-2 mt-1">
-                    <span className="text-green-900">@ {UserF.username}</span>
-                    {UserF.country && (
-                      <span className="flex gap-1 justify-center">
-                        <MapPin width={18} style={{ color: "red" }} />
-                        {UserF.country}
-                      </span>
-                    )}
-                  </p>
-                  {UserF.phoneNumber && (
-                    <p className="text-green-800 flex items-center justify-center md:justify-start gap-2 mt-1">
-                      <Phone width={18} />
-                      {UserF.phoneNumber}
-                    </p>
-                  )}
-
-                  {/* Business Links */}
-                  <p>
-                    <UserLinks emailuser={UserF.email} />
-                  </p>
+              <div className={`border flex flex-col md:flex-row sm:flex-row sm:items-start  md:items-start items- gap-2 sm:gap-5 md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
+               <div className={` flex-shrink-0 flex items-center justify-cente`}>
+                 <AlertDialog>
+                   <AlertDialogTrigger>
+                         <div>
+                         <Image
+                           width={140}
+                           height={140}
+                           src={UserF.urlimage}
+                           alt="Profile Image"
+                           className="object-cover md:block sm:block hidden cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
+                         />
+                         <Image
+                           width={100}
+                           height={100}
+                           src={UserF.urlimage}
+                           alt="Profile Image"
+                           className="object-cover md:hidden  sm:hidden block  cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
+                         />
+                         </div>
+                   </AlertDialogTrigger>
+                   <AlertDialogContent>
+                     <AlertDialogHeader>
+                       <AlertDialogDescription className="flex justify-center">
+                         <Image
+                           width={250}
+                           height={250}
+                           src={UserF.urlimage}
+                           alt="Profile Image"
+                           className="object-cover rounded-full cursor-pointer"
+                         />
+                       </AlertDialogDescription>
+                     </AlertDialogHeader>
+                     <AlertDialogFooter>
+                       <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 duration-300 hover:scale-105">
+                         Cancel
+                       </AlertDialogCancel>
+                       {/* <AlertDialogAction>Continue</AlertDialogAction> */}
+                     </AlertDialogFooter>
+                   </AlertDialogContent>
+                 </AlertDialog>
+               </div>
+                {/* Content */}
+                <div className="text-cente sm:text-left md:text-left">
+             <h2 className="font-bold text-2xl text-gray-800">
+               {UserF.fullname}
+             </h2>
+             {/* Email */}
+             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2 mt-1">
+               <span className="text-green-500">
+                 <MailCheck width={18} />
+               </span>{" "}
+               {UserF.email}
+             </p>
+             {/* Username and Country */}
+             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start md: gap-2 mt-1">
+               <span className="text-green-900">@ {UserF.username}</span>
+               {UserF.country && (
+                 <span className="flex items-center gap-1 justify-cente">
+                   <MapPin width={18} style={{ color: "red" }} />
+                   {UserF.country}
+                 </span>
+               )}
+             </p>
+              {/* Phone Number and BLinks */}
+             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start mt-">
+              {UserF.phoneNumber && (
+               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2 mt-">
+                 <Phone width={18} />
+                 {UserF.phoneNumber}
+               </p>
+             )}
+            {/* Business Links */}
+            <div >
+              <UserLinks emailuser={UserF.email} />
+            </div>
+             </div>
                   {/* datasocial */}
                   <div className="my-1">
                     <ul className="flex flex-wrap gap-4 justify-center">
@@ -203,8 +215,8 @@ function ProfilePage() {
                               >
                                 <Image
                                   src={item.src}
-                                  width={25}
-                                  height={25}
+                                  width={22}
+                                  height={22}
                                   alt={item.alt}
                                 />
                                 {/* <span className="ml-2 text-gray-800 font-medium">{item.alt}</span> */}
@@ -217,7 +229,7 @@ function ProfilePage() {
                 </div>
               </div>
               {/* Setting */}
-              <div className="absolute top-8 space-y-2 right-7 md:top-10  md:right-12">
+              <div className="absolute top-8 space-y-2 right-8 md:top-10  md:right-12">
                 {/* Link to Update */}
                 <Link
                   href={`/Profile/Update`}
@@ -306,10 +318,10 @@ function ProfilePage() {
                   <AlertDialogTrigger
                     className={`p-2 ${
                       !dt.data && "hidden"
-                    } bg-slate-100 md:text-[2.7vh] sm:text-[2.6vh] hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
+                    } bg-slate-100  hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
                   >
                     {
-                      <div className="flex gap-1">
+                      <div className="flex gap-[2px]">
                         <div>{dt.name.split(" ")[0]}</div>
                         <div>{dt.name.split(" ")[1]}</div>
                       </div>
@@ -343,7 +355,7 @@ function ProfilePage() {
                   content && (
                     <div key={i} className="border p-4 text-right!? bg-white rounded-lg shadow-md mb-4 hover:scale-100 duration-500">
                       <h3 className={` text-xl font-semibold text-indigo-600 mb-2`}>{title}</h3>
-                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{content}</p>
+                      <p className="text-gray-800 text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">{content}</p>
                     </div>
                   )
                 )}

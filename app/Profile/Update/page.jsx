@@ -338,7 +338,7 @@ function NameUser() {
     <section>
       {User && (
         <div style={{ backgroundColor:bgcolorp }}
-          className={`{bgcolorp} flex items-center justify-center pt-4 pb-6 duration-300`}
+          className={`{bgcolorp} flex items-center justify-center text-xs md:text-base  pt-4 pb-6 duration-300`}
         >
           <ParticleComponent style={{ backgroundColor:bgcolorp }} bgcolor={bgcolorp} />
           <form onSubmit={updateProfile} className="z-10">
@@ -353,6 +353,7 @@ function NameUser() {
                     width={160}
                     height={160}
                   />
+                  
                   <label
                     htmlFor="file-upload"
                     className="bg-gradient-to-r  from-teal-400 to-green-500 text-white font-semibold rounded-full px-4 py-2 cursor-pointer transition duration-300 hover:bg-green-600"
@@ -370,7 +371,7 @@ function NameUser() {
                 </div>
 
                 {/* User Information Section */}
-                <div className="bg-white shadow-xl border border-gray-200 rounded-lg p-6 w-full md:w-2/3 space-y-4">
+                <div className="bg-white shadow-xl text-xs md:text-base  border border-gray-200 rounded-lg p-6 w-full md:w-2/3 space-y-4">
                   <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
                     {fullname}
                   </h2>
@@ -455,14 +456,19 @@ function NameUser() {
                 </div>
               </div>
               {/* Modul */}
-              <div className="flex flex-wrap gap-2 mb-2 justify-center">
+              <div className="flex text-xs md:text-base  flex-wrap gap-2 mb-2 justify-center">
                 {datamodul.map((dt) => (
-                  <div key={dt.name}>
+                  <div key={dt.name} className=" mb-2">
                     <AlertDialog>
                       <AlertDialogTrigger
                         className={`p-2 bg-slate-100 hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
                       >
-                        {dt.name}
+                        {
+                      <div className="flex gap-[3px]">
+                        <div>{dt.name.split(" ")[0]}</div>
+                        <div>{dt.name.split(" ")[1]}</div>
+                      </div>
+                    }
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -502,14 +508,14 @@ function NameUser() {
                   {datasocial.map((item, i) => (
                     <AlertDialog key={i}>
                       <AlertDialogTrigger>
-                        <div className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 p-3 rounded-full shadow-md transition duration-300">
+                        <div className="flex text-xs md:text-base  items-center justify-center bg-gray-100 hover:bg-gray-200 p-3 rounded-full shadow-md transition duration-300">
                           <Image
                             src={item.iconSrc}
                             width={24}
                             height={24}
                             alt={item.alt}
                           />
-                          <span className="ml-2 text-gray-800 font-medium">
+                          <span className="ml-2  text-gray-800 font-medium">
                             {item.alt}
                           </span>
                         </div>
@@ -587,7 +593,7 @@ function NameUser() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Enter Summary"
-                  className="bg-gray-100 border border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
@@ -601,7 +607,7 @@ function NameUser() {
                   value={services}
                   onChange={(e) => setServices(e.target.value)}
                   placeholder="Enter Services"
-                  className="bg-gray-100 border border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
@@ -615,7 +621,7 @@ function NameUser() {
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
                   placeholder="Enter Education"
-                  className="bg-gray-100 border border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <div className="border-b border-gray-300 my-8"></div>
@@ -629,7 +635,7 @@ function NameUser() {
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
                   placeholder="Enter Experience"
-                  className="bg-gray-100 border border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               {/* Skills Section */}
@@ -642,7 +648,7 @@ function NameUser() {
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
                   placeholder="Enter Skills"
-                  className="bg-gray-100 border border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               {/* Languages Section */}
@@ -655,7 +661,7 @@ function NameUser() {
                   value={languages}
                   onChange={(e) => setLanguages(e.target.value)}
                   placeholder="Enter Languages"
-                  className="rounded-lg bg-white w-full px-3 h-32 py-2 border-2"
+                  className="rounded-lg bg-white text-xs md:text-base  w-full px-3 h-32 py-2 border-2"
                 />
               </div>
               <div className="border-b border-gray-300 my-4"></div>

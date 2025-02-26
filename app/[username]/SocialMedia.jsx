@@ -82,7 +82,7 @@ function SocialMedia({userDetailsG}) {
                     href={social.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex hover:scale-105 items-center justify-center bg-gray-100 hover:bg-gray-200 px-2 py-1.5 rounded-md shadow-md transition duration-300"
+                    className="flex hover:scale-105 items-center justify-center bg-gray-100 hover:bg-gray-200 px-2 py-1.5 rounded-md border shadow-md transition duration-300"
                   >
                     <Image
                       src={social.icon}
