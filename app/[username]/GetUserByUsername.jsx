@@ -290,19 +290,19 @@ function GetUserByUsername({ params }) {
             </AlertDialog>
           </div>
           {/* Content */}
-          <div className="text-cente sm:text-left md:text-left">
+          <div className="space-y-2 text-cente sm:text-left md:text-left">
              <h2 className="font-bold text-2xl text-gray-800">
                {userDetailsG.fullname}
              </h2>
              {/* Email */}
-             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2 mt-1">
+             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2">
                <span className="text-green-500">
                  <MailCheck width={18} />
                </span>{" "}
                {userDetailsG.email}
              </p>
              {/* Username and Country */}
-             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start md: gap-2 mt-1">
+             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start gap-2">
                <span className="text-green-900">@ {userDetailsG.username}</span>
                {userDetailsG.country && (
                  <span className="flex items-center gap-1 justify-cente">
@@ -312,9 +312,9 @@ function GetUserByUsername({ params }) {
                )}
              </p>
               {/* Phone Number and BLinks */}
-             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start mt-">
+             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start ">
               {userDetailsG.phoneNumber && (
-               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2 mt-">
+               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2 ">
                  <Phone width={18} />
                  {userDetailsG.phoneNumber}
                </p>

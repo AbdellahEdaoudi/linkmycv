@@ -249,17 +249,26 @@ function Page({ params }) {
     >
       <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
         {/* Image Profile and info user */}
-        <div className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} border flex flex-col md:flex-row sm:flex-row sm:items-start  md:items-start items-center sm:gap-5 md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
-          <div className={`${language === "ar" ? 'ml-4' : ''} flex-shrink-0 `}>
+        <div className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} border flex flex-col md:flex-row sm:flex-row sm:items-start  md:items-start items- gap-2 sm:gap-5 md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
+          <div className={`${language === "ar" ? 'ml-4' : ''} flex-shrink-0 flex items-center justify-cente`}>
             <AlertDialog>
               <AlertDialogTrigger>
+                    <div>
                     <Image
                       width={140}
                       height={140}
                       src={userDetailsG.urlimage}
                       alt="Profile Image"
-                      className="object-cover cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
+                      className="object-cover md:block sm:block hidden cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
                     />
+                    <Image
+                      width={100}
+                      height={100}
+                      src={userDetailsG.urlimage}
+                      alt="Profile Image"
+                      className="object-cover md:hidden  sm:hidden block  cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
+                    />
+                    </div>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -282,39 +291,42 @@ function Page({ params }) {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-          <div className="text-center sm:text-left md:text-left">
-            <div className={`font-bold text-2xl text-gray-800 ${language === "ar" && "text-start"}`}>
-              {userDetailsG.fullname}
-            </div>
-            <div className="text-gray-600 text-[1rem] flex items-center justify-center sm:justify-start md:justify-start gap-2 mt-1">
-                    <span className="text-green-500">
-                      <MailCheck width={18} />
-                    </span>
-                    {userDetailsG.email}
-            </div>
-            <div className={`${language === "ar" && "list-disc-ltr"} text-gray-600 flex md:flex-row sm:flex-row flex-col items-center sm:gap-2 md:gap-2 md:justify-start justify-center `}>
-              <div className={`flex gap-1 ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} text-green-900`}>
-                <span>@</span>
-                <span>{userDetailsG.username}</span>
-              </div>
-              {userDetailsG.country && (
-                <span className={`flex ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} flex-row justify-center gap-1`}>
-                  <MapPin width={18} style={{ color: "red" }} />
-                  {`${translatedDetails ? translatedDetails.country : userDetailsG.country}`}
-                </span>
-              )}
-            </div>
-            {userDetailsG.phoneNumber && (
-              <p className={`${language === "ar" && "list-disc-ltr"} text-gray-600 flex ${language === "ar" ? 'flex-row-reverse' : 'flex-row'} items-center justify-center sm:justify-start md:justify-start gap-2 mt-1`}>
-                <Phone width={18} style={{ color: "green" }} />
-                {userDetailsG.phoneNumber}
-              </p>
-            )}
-
+          {/* Content */}
+          <div className="space-y-2 sm:text-left md:text-left">
+             <h2 className={` ${language === "ar" && "text-right"} font-bold text-2xl text-gray-800`}>
+               {userDetailsG.fullname}
+             </h2>
+             {/* Email */}
+             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2 ">
+               <span className="text-green-500">
+                 <MailCheck width={18} />
+               </span>{" "}
+               {userDetailsG.email}
+             </p>
+             {/* Username and Country */}
+             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start  gap-2 ">
+               <span className="text-green-900">@ {userDetailsG.username}</span>
+               {userDetailsG.country && (
+                 <span className="flex items-center gap-1 justify-cente">
+                   <MapPin width={18} style={{ color: "red" }} />
+                  {`${translatedDetails ? translatedDetails.country : userDetailsG.country}`} 
+                 </span>
+               )}
+             </p>
+              {/* Phone Number and BLinks */}
+             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start">
+              {userDetailsG.phoneNumber && (
+               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2">
+                 <Phone width={18} />
+                 {userDetailsG.phoneNumber}
+               </p>
+             )}
             {/* Business Links */}
             <div className={`${language === "ar" && "text-right"} `}>
               <UserLinks language={language} setLanguage={setLanguage} emailuser={emailuser} />
             </div>
+             </div>
+             
             {/* Social Media */}
             <div>
             <SocialMedia userDetailsG={userDetailsG} />
@@ -322,7 +334,7 @@ function Page({ params }) {
           </div>
         </div>
         {/* Setting  */}
-        <nav className={`${language === "ar" ? 'list-disc-rtl sm:left-24 md:left-24 left-7 top-10' : 'list-disc-ltr sm:right-14  md:right-24 right-7 top-10'} grid grid-cols-1 sm:grid-cols-2  md:grid-cols-2 absolute sm:gap-5  md:gap-5 duration-300 gap-4`}>
+        <nav className={`${language === "ar" ? 'list-disc-rtl sm:left-24 md:left-24 left-7 top-10' : 'list-disc-ltr sm:right-10  md:right-24 right-7 top-10'} grid grid-cols-2 sm:grid-cols-2  md:grid-cols-2 absolute sm:gap-5  md:gap-5 duration-300 gap-2`}>
           {/* CopyLinkProfil */}
           <button
             className="rounded-full hover:scale-110 flex justify-center hover:bg-gray-200 border h-10 w-10 p-2  duration-300"
@@ -357,7 +369,7 @@ function Page({ params }) {
             <SignInComponents_CP userDetailsG={userDetailsG} />
           )}
           {/* translate */}
-          <div className="absolute sm:top-[116px] md:top-[113px] top-[220px] md:-right-1 w-full">
+          <div className="absolute sm:top-[116px] md:top-[113px] top-[110px] md:-right-1 w-full duration-300">
             <select
               className="bg-white border cursor-pointer border-gray-300 rounded-md mb-6 w-full"
               onChange={(e) => router.push(`/${params.username}/${e.target.value}`)}
@@ -396,9 +408,9 @@ function Page({ params }) {
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle className={` bg-gray-200  p-2 border rounded-md`}>
-                        <div className={`${language === "ar" && "text-right pr-1 "} text-start`}>{dt.namedata}</div>
+                        <div className={`${language === "ar" && "text-right pr-1 "} `}>{dt.namedata}</div>
                       </AlertDialogTitle>
-                      <AlertDialogDescription className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
+                      <AlertDialogDescription dir={language === "ar" ? "rtl" : "ltr"} className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
                         {dt.data}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -420,7 +432,10 @@ function Page({ params }) {
             content && (
               <div key={key} className="border p-4 text-right!? bg-white rounded-lg shadow-md mb-4 hover:scale-100 duration-500">
                 <h3 className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} text-xl font-semibold text-indigo-600 mb-2`}>{title}</h3>
-                <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{content}</p>
+                <p  dir={language === "ar" ? "rtl" : "ltr"}
+                    className={`${language === "ar" && "text-right"} text-gray-800 whitespace-pre-wrap leading-relaxed`}>
+                    {content}
+                  </p>
               </div>
             )
           )}
