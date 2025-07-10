@@ -149,62 +149,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-        <section
-          id="testimonials"
-          className="w-full py-12 md:py-24 bg-gradient-to-r from-slate-900 to-slate-800"
-        >
-          <div className="container px-4 md:px-6 mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-              What Our Customers Say
-            </h2>
-            <div className="grid gap-8 lg:grid-cols-3">
-              {[
-                {
-                  name: "Ahmad Mohammed",
-                  role: "Software Developer",
-                  comment:
-                    "LinkerFolio made it easier for me to showcase my work professionally and helped me secure new job opportunities.",
-                },
-                {
-                  name: "Sara Ali",
-                  role: "Graphic Designer",
-                  comment:
-                    "Finally found a platform that lets me showcase my work in a professional, attractive way.",
-                },
-                {
-                  name: "Mohammed Khaled",
-                  role: "Entrepreneur",
-                  comment:
-                    "Ease of use and elegant design have made LinkerFolio my go-to tool for building professional relationships.",
-                },
-              ].map((testimonial, index) => (
-                <Card
-                  key={index}
-                  className="bg-slate-800 border-none overflow-hidden hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300"
-                >
-                  <CardContent className="p-6">
-                    <p className="text-slate-300 mb-4">
-                      "{testimonial.comment}"
-                    </p>
-                    <div className="flex items-center">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 mr-4"></div>
-                      <div>
-                        <p className="font-semibold text-white">
-                          {testimonial.name}
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          {testimonial.role}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section
           id="pricing"
           className="w-full hidden py-12  md:py-20 bg-slate-800"
