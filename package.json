@@ -64,7 +64,6 @@
     "react-select": "^5.8.0",
     "react-swipeable": "^7.0.1",
     "react-syntax-highlighter": "^15.5.0",
-    "react-to-pdf": "^1.0.1",
     "react-toastify": "^10.0.5",
     "redux": "^5.0.1",
     "resend": "^4.0.0",
