@@ -17,7 +17,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { bgcolorOptions } from "../../data/bgcolorOptions";
 import { MyContext } from "../../Context/MyContext";
-import UpdatePLoading from "../../Components/Loading/UpdatePLoading";
+import UpdatePLoading from "../../Home/Components/Loading/UpdatePLoading";
 import { toast } from "react-toastify";
 import { CheckCircle } from "lucide-react";
 import ParticleComponent from "../../Components/ParticleComponent";

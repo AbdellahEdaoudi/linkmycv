@@ -11,8 +11,8 @@ import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "./CustomLinkify";
+import LMessages from "../Home/Components/Loading/LMessages";
 import InputLoadMessages from "./Loading/InputLoadMessages";
-import LMessages from "./Loading/LoadChatPage/LMessages";
 
 function Messages({ selectedUser }) {
   const { toast } = useToast();

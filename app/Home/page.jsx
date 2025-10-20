@@ -1,9 +1,9 @@
 "use client"
 import { useContext, useEffect } from "react";
-import ChatHome from "../Components/ChatHome";
+import ChatHome from "./Components/ChatHome";
 import { MyContext } from "../Context/MyContext";
 import CreateProfile from "../Components/CreateProfile";
-import LoadChatPage from "../Components/Loading/LoadChatPage/LoadChatPage";
+import LoadChatPage from "./Components/Loading/LoadChatPage";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 

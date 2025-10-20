@@ -20,15 +20,11 @@ export const MyProvider = ({ children }) => {
   const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
   const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
   
-
-
-  // const CLIENT_URL = "http://localhost:3000";
-  // const SERVER_URL = "http://localhost:9999" ;
-  // const SERVER_URL_V = "http://localhost:9999" ;
-   const CLIENT_URL = "https://linkerfolio.vercel.app";
-   const SERVER_URL = "https://server-linkerfolio.onrender.com";
-   const SERVER_URL_V = "https://server-linkerfolio.vercel.app";
-   const audioRef = useRef(null);
+  const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ;
+  const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
+  const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
+  const audioRef = useRef(null);
+  
   // socket.io
   useEffect(() => {
     const socket = io(SERVER_URL);

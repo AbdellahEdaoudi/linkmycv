@@ -23,7 +23,7 @@ import { Button } from "@chakra-ui/react";
 import { toast } from "sonner";
 import { MyContext } from "../Context/MyContext";
 import UserLinks from "../[username]/UserLinks";
-import Loadingpage from "../Components/Loading/LoadingPage";
+import Loadingpage from "../Home/Components/Loading/LoadingPage";
 import QrcodeProfile from "./QrcodeProfile";
 import CreateProfile from "../Components/CreateProfile";
 import ParticleComponent from "../Components/ParticleComponent";

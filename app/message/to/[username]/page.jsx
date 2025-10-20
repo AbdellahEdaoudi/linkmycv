@@ -13,8 +13,8 @@ import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../../../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "../../../Components/CustomLinkify";
-import LMessages from "../../../Components/Loading/LoadChatPage/LMessages";
-import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
+import LMessages from "../../../Home/Components/Loading/LMessages";
+import InputLoadMessages from "../../../Home/Components/Loading/InputLoadMessages";
 
 function UserProfile({ params }) {
   const { toast } = useToast();

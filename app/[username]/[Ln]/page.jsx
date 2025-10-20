@@ -23,13 +23,13 @@ import {
 } from "../../../components/ui/alert-dialog";
 import { MyContext } from "../../Context/MyContext";
 import UserLinks from "../UserLinks";
-import Loadingpage from "../../Components/Loading/LoadingPage";
+import Loadingpage from "../../Home/Components/Loading/LoadingPage";
 import FriendRequest from "../FriendRequest";
 import SignInComponents from "../../Components/SignIn/SignInComponents";
 import SignInComponents_CP from "../../Components/SignIn/SignInComponents_CP";
 import QrcodeProfile from "../QrcodeProfile";
 import { languagess } from "../../data/language";
-import LoadingPagetranslate from "../../Components/Loading/LoadingPagetranslate";
+import LoadingPagetranslate from "../../Home/Components/Loading/LoadingPagetranslate";
 import { useSession } from "next-auth/react";
 import SocialMedia from "../SocialMedia"
 
