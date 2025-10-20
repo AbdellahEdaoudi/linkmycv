@@ -23,10 +23,10 @@ import { Button } from "@chakra-ui/react";
 import { toast } from "sonner";
 import { MyContext } from "../Context/MyContext";
 import UserLinks from "../[username]/UserLinks";
-import Loadingpage from "../Home/Components/Loading/LoadingPage";
 import QrcodeProfile from "./QrcodeProfile";
 import CreateProfile from "../Components/CreateProfile";
 import ParticleComponent from "../Components/ParticleComponent";
+import Loadingpage from "../Components/Loading/LoadingPage";
 
 function ProfilePage() {
   const [copied, setCopied] = useState(false);
@@ -42,7 +42,7 @@ function ProfilePage() {
 
 
   if (!filtUser) {
-    return <Loadingpage />;
+    return <Loadingpage/>;
   }
   const datasocial = [
     { key: "Linkedin", src: "/Icons/link.svg", alt: "LinkedIn" },

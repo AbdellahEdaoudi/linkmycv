@@ -14,7 +14,7 @@ import { MyContext } from "../../../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "../../../Components/CustomLinkify";
 import LMessages from "../../../Home/Components/Loading/LMessages";
-import InputLoadMessages from "../../../Home/Components/Loading/InputLoadMessages";
+import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
 
 function UserProfile({ params }) {
   const { toast } = useToast();
