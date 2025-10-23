@@ -1,6 +1,6 @@
 import React from "react";
 
-function LUserList() {
+function LoadUserList() {
   return (
     <section className="">
       <input
@@ -31,4 +31,4 @@ function LUserList() {
   );
 }
 
-export default LUserList;
+export default LoadUserList;
