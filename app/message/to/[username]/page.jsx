@@ -8,12 +8,11 @@ import { useToast } from "../../../../components/ui/use-toast";
 import { BsEmojiSmile } from "react-icons/bs";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import io from "socket.io-client";
 import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../../../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "../../../Components/CustomLinkify";
-import LMessages from "../../../Home/Components/Loading/LMessages";
+import LMessages from "../../../Components/Loading/LMessages";
 import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
 
 function UserProfile({ params }) {
@@ -28,7 +27,8 @@ function UserProfile({ params }) {
   const [idMsg, setIdMsg] = useState("");
   const messagesEndRef = useRef(null);
   const lod = Array.from({ length: 10 }, (_, index) => index + 1);
-  const {SERVER_URL,SERVER_URL_V,userDetails, EmailUser,messages,setMessages,socket,friendRequests}=useContext(MyContext);
+  const {SERVER_URL_V,userDetails, EmailUser,messages,setMessages,socket,
+    friendRequests,loadingFriendRequests,loadingMessages}=useContext(MyContext);
   const filtUser = userDetails.find((fl) => fl.email === EmailUser);
   const router = useRouter();
   const userDname = userDetails.find((user)=>user.username === params.username);
@@ -41,7 +41,7 @@ function UserProfile({ params }) {
     }
   }, [messages]);
 
-
+  // Add Emoji to message input 
   const addEmoji = (e) => {
   const sym = e.unified.split("-");
   const codeArray = sym.map((el) => "0x" + el);
@@ -189,8 +189,7 @@ function UserProfile({ params }) {
       (f.from === emailuser && f.to === EmailUser)
   );
   
-  if (!userDname || !friendRequests  || friendRequests.length === 0
-    || !messages || messages.length === 0) {
+  if (!userDname || loadingFriendRequests || loadingMessages) {
     return <LMessages />;
   }
   const FilterMessages = messages.filter((fl) => {

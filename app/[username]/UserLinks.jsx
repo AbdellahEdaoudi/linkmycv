@@ -36,6 +36,28 @@ function UserLinks({ emailuser, language, setLanguage }) {
     }
   };
 
+  
+
+  useEffect(() => {
+    // Translate links
+  const translateLinks = async () => {
+    if (userLinks) {
+      if (language) {
+        const translated = await Promise.all(
+          userLinks
+            .filter((fl) => fl.useremail === emailuser)
+            .map(async (link) => ({
+              ...link,
+              namelink: await translateContent(link.namelink, language),
+            }))
+        );
+        setDisplayLinks(translated);
+      } else {
+        setDisplayLinks(userLinks.filter((fl) => fl.useremail === emailuser));
+      }
+      setLoading(false);
+    }
+  };
   // Translate static texts
   const translateStaticTexts = async () => {
     if (language) {
@@ -69,28 +91,6 @@ function UserLinks({ emailuser, language, setLanguage }) {
       });
     }
   };
-
-  // Translate links
-  const translateLinks = async () => {
-    if (userLinks) {
-      if (language) {
-        const translated = await Promise.all(
-          userLinks
-            .filter((fl) => fl.useremail === emailuser)
-            .map(async (link) => ({
-              ...link,
-              namelink: await translateContent(link.namelink, language),
-            }))
-        );
-        setDisplayLinks(translated);
-      } else {
-        setDisplayLinks(userLinks.filter((fl) => fl.useremail === emailuser));
-      }
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     translateLinks();
     translateStaticTexts();
   }, [userLinks, language]);

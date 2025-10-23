@@ -1,7 +1,7 @@
 "use client"
 import { EllipsisVertical } from 'lucide-react';
 import React, { useState } from 'react'
-import InputLoadMessages from '../../../Components/Loading/InputLoadMessages';
+import InputLoadMessages from '../../Components/Loading/InputLoadMessages';
 
 function LMessages() {
   const [emoji, setEmoji] = useState(true);

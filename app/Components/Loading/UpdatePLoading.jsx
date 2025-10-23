@@ -1,3 +1,4 @@
+import Image from "next/image";
 
 
 function UpdatePLoading() {
@@ -104,7 +105,7 @@ function UpdatePLoading() {
   <div className="flex flex-wrap gap-4 justify-center">
     {datasocial.map((item, i) => (
       <div key={i} className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 p-3 rounded-full shadow-md transition duration-300">
-      <img src={item.iconSrc} width={24} height={24} alt={item.alt} />
+      <Image src={item.iconSrc}  width={24} height={24} alt={item.alt} />
       <span className="ml-2 text-gray-800 font-medium">{item.alt}</span>
     </div>
     ))}

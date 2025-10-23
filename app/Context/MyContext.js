@@ -20,10 +20,12 @@ export const MyProvider = ({ children }) => {
    const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
    const [loadingUsers, setLoadingUsers] = useState(false);
    const [loadingMessages, setLoadingMessages] = useState(false);
+   const [loadingFriendRequests, setLoadingFriendRequests] = useState(false);
    const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ;
    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
+
   // socket.io
   useEffect(() => {
     const socket = io(SERVER_URL);
@@ -134,22 +136,30 @@ export const MyProvider = ({ children }) => {
         console.error("Error fetching user details:", error);
       });
   }, [SERVER_URL_V]);
+
   // GetFriendRequest
   useEffect(() => {
     const GetFriendRequest = async () => {
       try {
-        const response = await axios.get(`${SERVER_URL_V}/friend`,{
+        setLoadingFriendRequests(true);
+        const response = await axios.get(`${SERVER_URL_V}/friend`, {
           headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-          }
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+          },
         });
         setFriendRequests(response.data.data);
       } catch (error) {
-        console.error('Error fetching friend requests', error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching friend requests",
+          error.response ? error.response.data : error.message
+        );
+      } finally {
+        setLoadingFriendRequests(false); // إنهاء اللودينغ
       }
     };
+
     GetFriendRequest();
-  }, []);
+  }, [SERVER_URL_V]);
 
 
   const latestNotifications = messages
@@ -204,7 +214,7 @@ const Requests = friendRequests
         setMessages,
         socket,
         friendRequests, setFriendRequests,
-        Requests , loadingMessages,loadingUsers
+        Requests , loadingMessages,loadingUsers , loadingFriendRequests
       }}
     >
       <audio ref={audioRef} src="/notification3.mp3" preload="auto" />

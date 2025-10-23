@@ -112,7 +112,8 @@ function Navbar() {
     };
 
     setShuffledUserDetails(shuffleArray([...filteredUserDetails]));
-  }, [search]);
+  }, [search,filteredUserDetails]);
+
   const safeHighlightText = (text) => {
     if (!search.trim()) return text;
     const regex = new RegExp(`(${search.trim()})`, "gi");

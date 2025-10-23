@@ -3,7 +3,7 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { MyContext } from "../Context/MyContext";
-import LoadChatPage from "../Home/Components/Loading/LoadChatPage";
+import LoadChatPage from "../Components/Loading/LoadChatPage";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ParticleComponent from "./ParticleComponent";

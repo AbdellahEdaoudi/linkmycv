@@ -1,8 +1,8 @@
 "use client";
-import React, {useEffect, useState } from "react";
-import Messages from "../../Components/Messages";
-import UserListMobile from "../Components/UserListMobile";
-import UserList from "../Components/UserList";
+import React, {useState } from "react";
+import Messages from "./Messages";
+import UserListMobile from "../Components/UserList/UserListMobile";
+import UserList from "../Components/UserList/UserList";
 
 function ChatHome() {
   const [selectedUser, setSelectedUser] = useState(

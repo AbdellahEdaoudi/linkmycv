@@ -11,7 +11,6 @@ import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "./CustomLinkify";
-import LMessages from "../Home/Components/Loading/LMessages";
 import InputLoadMessages from "./Loading/InputLoadMessages";
 
 function Messages({ selectedUser }) {
@@ -26,26 +25,20 @@ function Messages({ selectedUser }) {
   const [idMsg, setIdMsg] = useState("");
   const messagesEndRef = useRef(null);
   const lod = Array.from({ length: 20 }, (_, index) => index + 1);
-  const { SERVER_URL, SERVER_URL_V, userDetails, EmailUser,
-    messages, setMessages ,
-    socket, setSocket ,
-    friendRequests, setFriendRequests
+  const {SERVER_URL_V, userDetails, EmailUser,
+    messages, setMessages ,socket,friendRequests
   } =
     useContext(MyContext);
   const filtUser = userDetails.find((fl) => fl.email === EmailUser);
   const router = useRouter();
 
-  
-  useEffect(() => {
-    if (selectedUser) {
-      setputdelete(true);
-    }
-  }, [selectedUser]);
+  // Scroll to bottom on new message
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
     }
   }, [messages, selectedUser]);
+  // Add Emoji to message input
   const addEmoji = (e) => {
   const sym = e.unified.split("-");
   const codeArray = sym.map((el) => "0x" + el);
@@ -86,7 +79,7 @@ function Messages({ selectedUser }) {
       input.focus();
     }, 0);
   }
-};
+  };
 
   const sendMessage = async () => {
     setLoading(true);
@@ -184,16 +177,7 @@ function Messages({ selectedUser }) {
       setLoadingu(false);
     }
   };
-
-  if (
-    !selectedUser ||
-    !friendRequests ||
-    friendRequests.length === 0 ||
-    !EmailUser ||
-    !messages || messages.length === 0
-  ) {
-    return <LMessages />;
-  }
+  // Filter Messages between EmailUser and selectedUser
   const FilterMessages = messages.filter((fl) => {
     return (
       (fl.from === EmailUser && fl.to === selectedUser?.email) ||
