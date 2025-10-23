@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +58,7 @@ function NameUser() {
   const [id, setid] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const User = userDetails.find((user) => user.email === EmailUser);
+  const usernameInputRef = useRef(null);
   useEffect(() => {
     if (User) {
       setFullname(User.fullname);
@@ -88,7 +89,11 @@ function NameUser() {
       setExperience(User.experience);
       setid(User._id);
     }
-  }, [User]);
+    if (errorMessage && usernameInputRef.current) {
+    usernameInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    usernameInputRef.current.focus();
+       }
+  }, [User,errorMessage]);
 
   const datasocial = [
     {
@@ -414,6 +419,11 @@ function NameUser() {
                         placeholder="Enter your username"
                         required
                       />
+                      {errorMessage && (
+                           <div className="text-red-600 mt-4">
+                             <span>{errorMessage}</span>
+                           </div>
+                        )}
                     </div>
                     <div>
                       <label className="block text-gray-700 font-semibold mb-2">
@@ -686,6 +696,7 @@ function NameUser() {
                   <span>{errorMessage}</span>
                   <input
                     type="text"
+                    ref={usernameInputRef}
                     value={username}
                     onChange={(e) => {
                       const newValue = e.target.value
