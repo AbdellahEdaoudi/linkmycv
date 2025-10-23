@@ -25,6 +25,13 @@ export const MyProvider = ({ children }) => {
    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
+   const [selectedUser, setSelectedUser] = useState(null);
+   useEffect(() => {
+     const storedUser = localStorage.getItem("SelectedUser");
+     if (storedUser) {
+       setSelectedUser(JSON.parse(storedUser));
+     }
+   }, []);
 
   // socket.io
   useEffect(() => {
@@ -212,7 +219,7 @@ const Requests = friendRequests
         SERVER_URL_V,
         messages,
         setMessages,
-        socket,
+        socket,selectedUser, setSelectedUser,
         friendRequests, setFriendRequests,
         Requests , loadingMessages,loadingUsers , loadingFriendRequests
       }}

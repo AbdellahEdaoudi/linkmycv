@@ -1,13 +1,12 @@
 "use client";
-import React, {useState } from "react";
+import React, {useContext, useState } from "react";
 import Messages from "./Messages";
 import UserListMobile from "../Components/UserList/UserListMobile";
 import UserList from "../Components/UserList/UserList";
+import { MyContext } from "../Context/MyContext";
 
 function ChatHome() {
-  const [selectedUser, setSelectedUser] = useState(
-  () => JSON.parse(localStorage.getItem("SelectedUser")) || null
-);
+  const {selectedUser, setSelectedUser} = useContext(MyContext);
 
   
   return (

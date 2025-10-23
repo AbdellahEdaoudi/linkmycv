@@ -1,7 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import axios from "axios";
+import { useContext, useState } from "react";
 import Image from "next/image";
 import {
   Link,
@@ -38,13 +37,12 @@ function GetUserByUsername({ params }) {
   const { data, status } = useSession();
   const router = useRouter()
   const path = usePathname();
-  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser}=useContext(MyContext);
-  // const [userDetailsG, setUserDetailsG] = useState(null);
+  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser,
+         loadingUsers,      
+        }=useContext(MyContext);
   const userDetailsG = userDetails.find((user)=>user.username === params.username)
-  const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [translatedDetails, setTranslatedDetails] = useState(null);
-  const [loading, setLoading] = useState(true); 
   const [language, setLanguage] = useState('');
   const filt = userDetails.find((fl) => fl.email === EmailUser);
   const CopyLinkProfil = () => {
@@ -56,85 +54,20 @@ function GetUserByUsername({ params }) {
     });
   };
 
-    // // Translate content
-    // const translateContent = async (content, lang) => {
-    //   try {
-    //     const response = await axios.post(`${SERVER_URL_V}/translate`, {
-    //       textObject: content,
-    //       to: lang
-    //     }, {
-    //       headers: {
-    //         'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
-    //       }
-    //     });
-    //     setTranslatedDetails(response.data.translations);
-    //   } catch (error) {
-    //     console.error('Error translating content:', error);
-    //   }
-    // };
-    // useEffect(() => {
-    //   const fetchUserDetails = async () => {
-    //     setLoading(true);
-    //     try {
-    //       const response = await axios.get(`${SERVER_URL_V}/user/${params.username}`, {
-    //         headers: {
-    //           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-    //         }
-    //       });
-    //       setUserDetailsG(response.data);
-    //       if (language !== "") {
-    //         await translateContent({
-    //           Summary: "Summary",
-    //           Services: "Services",
-    //           Education: "Education",
-    //           Experience: "Experience",
-    //           Skills: "Skills",
-    //           Languages: "Languages",
-    //           bio: response.data.bio,
-    //           services: response.data.services,
-    //           education: response.data.education,
-    //           skills: response.data.skills,
-    //           languages: response.data.languages,
-    //           experience: response.data.experience,
-    //           country: response.data.country,
-    //           category: response.data.category
-    //         }, language);
-    //       }
-    //     } catch (error) {
-    //       console.error('Error fetching user details:', error);
-    //       setError('error')
-    //     } finally {
-    //       setLoading(false); // Set loading false after fetching
-    //     }
-    //   };
-    //   fetchUserDetails();
-    // }, [SERVER_URL_V, language]);
 
-    if (!userDetails || userDetails.length === 0) {
+    if (loadingUsers || userDetails.length === 0) {
       return <Loadingpage />
 
     }
   
-    const FindName = userDetails.find((fl) => fl.username === params.username);
-      if (!userDetailsG && !FindName) {
+      if (!userDetailsG && !loadingUsers) {
       return (
         <div>
           <AccountNotFound />
         </div>
-      );
-    }
-  if (error || !userDetailsG) {
-    return (
-      <AccountNotFound />
-    );
-  }
-  // if (loading) {
-  //   return (
-  //     <div>
-  //       <LoadingPagetranslate language={language} bgcolorp={userDetailsG?.bgcolorp} />
-  //     </div>
-  //   );
-  // }
+          );
+        }
+
   const datamodul = [
     {
       name: translatedDetails 
@@ -243,7 +176,7 @@ function GetUserByUsername({ params }) {
     signIn("google", {redirect:true, callbackUrl:`/${userDetailsG?.username}`})
   }
   return (
-    <div className={`flex items-start justify-center text-xs sm:text-base md:text-base  pt-4  pb-20 relative ${userDetailsG.bgcolorp}`}>
+    <div className={`flex items-start justify-center h-screen text-xs sm:text-base md:text-base  pt-4  pb-20 relative ${userDetailsG.bgcolorp}`}>
       <ParticleComponent  bgcolor={userDetailsG.bgcolorp} /> 
       <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
         {/* Image Profile and info user */}

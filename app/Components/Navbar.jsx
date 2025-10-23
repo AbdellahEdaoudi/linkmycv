@@ -36,9 +36,8 @@ function Navbar() {
   const [FR_FRREQ, setFR_FRREQ] = useState("Friend Requests");
   const navRef = useRef(null);
   const {userDetails,Notification,EmailUser,Requests,
-    messages,setMessages,SERVER_URL_V} = useContext(MyContext);
-  const [search, setSearch] = useState("");
-  const [shuffledUserDetails, setShuffledUserDetails] = useState([]);
+    messages,setMessages,SERVER_URL_V,loadingUsers} = useContext(MyContext);
+  const [search, setSearch] = useState(""); 
   useEffect(() => {
     const User = userDetails.find((user) => user.email === EmailUser);
     if (User && User.email === "abdellahedaoudi80@gmail.com") {
@@ -88,31 +87,22 @@ function Navbar() {
         return null; // Handle the default case
     }
   };
-  const filteredUserDetails = userDetails.filter(
+  const shuffleArray = (array) => {
+  return array.sort(() => Math.random() - 0.5);
+};
+
+const filteredUserDetails = userDetails
+  .filter(
     (user) =>
       user.fullname.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase()) ||
       user.category.toLowerCase().includes(search.toLowerCase()) ||
       user.username.toLowerCase().includes(search.toLowerCase())
-  );
-  useEffect(() => {
-    const shuffleArray = (array) => {
-      let currentIndex = array.length,
-        randomIndex;
-      while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-        [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex],
-          array[currentIndex],
-        ];
-      }
+  )
+  .slice(); // نسخة جديدة
 
-      return array;
-    };
+const shuffledUserDetails = shuffleArray(filteredUserDetails);
 
-    setShuffledUserDetails(shuffleArray([...filteredUserDetails]));
-  }, [search,filteredUserDetails]);
 
   const safeHighlightText = (text) => {
     if (!search.trim()) return text;
@@ -172,7 +162,7 @@ function Navbar() {
               </div>
             </div>
 
-            {(status === "authenticated" && userDetails) &&
+            {(status === "authenticated" && !loadingUsers) &&
               filt.map((userr, i) => (
                 <div key={i} className="flex items-center gap-1">
                   <div
@@ -266,7 +256,7 @@ function Navbar() {
                 </div>
               ))}
             {status === "unauthenticated" && <SignInWithGoogle />}
-            {(status === "loading" || !userDetails || userDetails.length === 0 ) && (
+            {(status === "loading" || loadingUsers) && (
               <div className={`${status === "unauthenticated" && "hidden"} flex md:flex-row flex-row-reverse items-center gap-2`}>
                 <div className="w-11 h-11 bg-gray-300 rounded-full"></div>
                 <div>

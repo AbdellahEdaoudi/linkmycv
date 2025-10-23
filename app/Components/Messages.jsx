@@ -210,25 +210,25 @@ function Messages({ selectedUser }) {
           <div className="mb-2 bg-slate-200 py-1 rounded-lg px-4 ">
             <div className="flex items-center justify-between gap-4">
               <Link
-                href={`/${selectedUser.username}`}
+                href={`/${selectedUser?.username}`}
                 className="cursor-pointer hover:scale-105 duration-300 flex gap-2 items-center"
               >
                 <div className="w-12 h-12 border-2 border-green-500 rounded-full flex-shrink-0 overflow-hidden">
                   <Image
                     width={96} // 24 * 4
                     height={96} // 24 * 4
-                    src={selectedUser.urlimage}
+                    src={selectedUser?.urlimage}
                     alt="Profile Image"
                     className="object-cover"
                   />
                 </div>
                 <p className="font-bold line-clamp-1">
-                  {selectedUser.fullname}
+                  {selectedUser?.fullname}
                 </p>
               </Link>
-              <p className="font-bold md:block hidden">{selectedUser.email}</p>
+              <p className="font-bold md:block hidden">{selectedUser?.email}</p>
               <p className="font-bold md:block hidden">
-                {selectedUser.phoneNumber}
+                {selectedUser?.phoneNumber}
               </p>
             </div>
           </div>
