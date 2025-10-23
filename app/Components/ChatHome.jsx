@@ -5,14 +5,10 @@ import UserListMobile from "./UserList/UserListMobile";
 import UserList from "./UserList/UserList";
 
 function ChatHome() {
-  const [selectedUser, setSelectedUser] = useState(null);
-  // Retrieve selected user from localStorage
-  useEffect(() => {
-    const UserSelected = localStorage.getItem("SelectedUser");
-    if (UserSelected) {
-      setSelectedUser(JSON.parse(UserSelected));
-    }
-  }, []);
+  const [selectedUser, setSelectedUser] = useState(
+  () => JSON.parse(localStorage.getItem("SelectedUser")) || null
+);
+
   
   return (
     <div>

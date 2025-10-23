@@ -47,15 +47,46 @@ function Messages({ selectedUser }) {
     }
   }, [messages, selectedUser]);
   const addEmoji = (e) => {
-    const sym = e.unified.split("-");
-    const codeArray = sym.map((el) => "0x" + el);
-    const emoji = String.fromCodePoint(...codeArray);
-    if (putdelete) {
-      setMessageInput(messageInput + emoji);
-    } else {
-      setUMessage(umessage + emoji);
-    }
-  };
+  const sym = e.unified.split("-");
+  const codeArray = sym.map((el) => "0x" + el);
+  const emoji = String.fromCodePoint(...codeArray);
+
+  if (putdelete) {
+    const input = document.getElementById("messageInput"); // أو استخدم ref
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    const newText =
+      messageInput.substring(0, start) +
+      emoji +
+      messageInput.substring(end);
+
+    setMessageInput(newText);
+
+    // إعادة وضع المؤشر بعد الإيموجي
+    setTimeout(() => {
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+    }, 0);
+  } else {
+    // نفس الشيء إذا كنت تستخدم uMessage
+    const input = document.getElementById("uMessageInput");
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    const newText =
+      umessage.substring(0, start) +
+      emoji +
+      umessage.substring(end);
+
+    setUMessage(newText);
+
+    setTimeout(() => {
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+    }, 0);
+  }
+};
 
   const sendMessage = async () => {
     setLoading(true);
@@ -76,10 +107,9 @@ function Messages({ selectedUser }) {
         },
       });
       setMessages((prevMessages) => [...prevMessages, response.data]);
-      socket.emit("sendMessage", response.data);
-      toast({ description: "Your message has been sent." });
       setMessageInput("");
       setEmoji(true);
+      socket.emit("sendMessage", response.data);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -100,9 +130,9 @@ function Messages({ selectedUser }) {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message._id !== idMsg)
       );
-      socket.emit("deleteMessage", idMsg);
       setputdelete(true);
       setEmoji(true);
+      socket.emit("deleteMessage", idMsg);
     } catch (error) {
       console.error("Error deleting message:", error);
       toast({
@@ -140,9 +170,10 @@ function Messages({ selectedUser }) {
           message._id === idMsg ? response.data : message
         )
       );
-      socket.emit("updateMessage", response.data);
+      setMessageInput("");
       setputdelete(true);
       setEmoji(true);
+      socket.emit("updateMessage", response.data);
     } catch (error) {
       console.error("Error updating message:", error);
       toast({
@@ -392,6 +423,7 @@ function Messages({ selectedUser }) {
                 >
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
+                      id="messageInput"
                       type="text"
                       placeholder="Enter your message here..."
                       value={messageInput}
@@ -432,6 +464,7 @@ function Messages({ selectedUser }) {
                 >
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
+                      id="uMessageInput"
                       type="text"
                       placeholder="Enter your message here..."
                       value={umessage}

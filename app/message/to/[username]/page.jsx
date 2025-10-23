@@ -43,15 +43,46 @@ function UserProfile({ params }) {
 
 
   const addEmoji = (e) => {
-    const sym = e.unified.split("-");
-    const codeArray = sym.map((el) => "0x" + el);
-    const emoji = String.fromCodePoint(...codeArray);
-    if (putdelete) {
-      setMessageInput(messageInput + emoji);
-    } else {
-      setUMessage(umessage + emoji);
-    }
-  };
+  const sym = e.unified.split("-");
+  const codeArray = sym.map((el) => "0x" + el);
+  const emoji = String.fromCodePoint(...codeArray);
+
+  if (putdelete) {
+    const input = document.getElementById("messageInput"); // أو استخدم ref
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    const newText =
+      messageInput.substring(0, start) +
+      emoji +
+      messageInput.substring(end);
+
+    setMessageInput(newText);
+
+    // إعادة وضع المؤشر بعد الإيموجي
+    setTimeout(() => {
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+    }, 0);
+  } else {
+    // نفس الشيء إذا كنت تستخدم uMessage
+    const input = document.getElementById("uMessageInput");
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    const newText =
+      umessage.substring(0, start) +
+      emoji +
+      umessage.substring(end);
+
+    setUMessage(newText);
+
+    setTimeout(() => {
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+    }, 0);
+  }
+};
 
   const sendMessage = async () => {
     setLoading(true);
@@ -71,10 +102,9 @@ function UserProfile({ params }) {
         }
       });
       setMessages((prevMessages) => [...prevMessages, response.data]);
-      socket.emit("sendMessage", response.data);
-      toast({ description: "Your message has been sent." });
       setMessageInput("");
       setEmoji(true);
+      socket.emit("sendMessage", response.data);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -96,9 +126,9 @@ function UserProfile({ params }) {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message._id !== idMsg)
       );
-      socket.emit("deleteMessage", idMsg);
       setputdelete(true);
       setEmoji(true);
+      socket.emit("deleteMessage", idMsg);
     } catch (error) {
       console.error("Error deleting message:", error);
       toast({
@@ -136,9 +166,10 @@ function UserProfile({ params }) {
           message._id === idMsg ? response.data : message
         )
       );
-      socket.emit("updateMessage", response.data);
+      setMessageInput("");
       setputdelete(true);
       setEmoji(true);
+      socket.emit("updateMessage", response.data);
     } catch (error) {
       console.error("Error updating message:", error);
       toast({
@@ -150,27 +181,6 @@ function UserProfile({ params }) {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchUserDetails = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${SERVER_URL}/user/${params.username}`
-  //         ,{
-  //           headers: {
-  //             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-  //           }
-  //         });
-  //       if (!response.data) {
-  //         throw new Error("User not found");
-  //       }
-  //       setUserDname(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching user details:", error);
-  //     }
-  //   };
-  //   fetchUserDetails();
-  // }, [SERVER_URL,params.username]);
-  
 
   const emailuser = userDname?.email;
   const CheckFrirnd = friendRequests.find(
@@ -415,6 +425,7 @@ function UserProfile({ params }) {
                 >
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
+                      id="messageInput"
                       type="text"
                       placeholder="Enter your message here..."
                       value={messageInput}
@@ -455,6 +466,7 @@ function UserProfile({ params }) {
                 >
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
+                      id="uMessageInput"
                       type="text"
                       placeholder="Enter your message here..."
                       value={umessage}

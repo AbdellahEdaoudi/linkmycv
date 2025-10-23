@@ -5,7 +5,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MyContext } from "../../Context/MyContext";
-import io from "socket.io-client";
 import DOMPurify from 'dompurify';
 
 function UserListMobile({ selectedUser, setSelectedUser }) {
@@ -14,89 +13,68 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
   const lodd = Array.from({ length: 20 }, (_, index) => index + 1);
   const {
     SERVER_URL_V,
-    SERVER_URL,
     setMessages,
     userDetails,
-    EmailUser,socket, setSocket,
-    messages,friendRequests, setFriendRequests  
+    EmailUser,
+    messages,
   } = useContext(MyContext);
   const router = useRouter();
 
+  // Handle User Click
+  const handleUserClick = async (User, lastMessage) => {
+  try {
+    // تعيين المستخدم المختار وتخزينه في localStorage
+    setSelectedUser(User);
+    localStorage.setItem("SelectedUser", JSON.stringify(User));
 
-  const ReadOrNo = async (fromEmail,toEmail) => {
-    try {
-      const response = await axios.put(`${SERVER_URL_V}/readorno`, {
-        fromEmail,
-        toEmail,
-      },{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
+    // تحديث حالة الرسائل المقروءة إذا كانت lastMessage موجودة
+    if (lastMessage?.from && lastMessage?.to) {
+      await axios.put(
+        `${SERVER_URL_V}/readorno`,
+        {
+          fromEmail: lastMessage.from,
+          toEmail: lastMessage.to,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+          },
         }
-      });
-      const from = response.data.result[0].from
-      const to = response.data.result[0].to
-      setMessages(prevMessages =>
-        prevMessages.map(message =>
-          message.from === from && message.to === to && message.readorno === false
+      );
+      // تحديث الرسائل محليًا مباشرة باستخدام lastMessage
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message.from === lastMessage.from &&
+          message.to === lastMessage.to &&
+          message.readorno === false
             ? { ...message, readorno: true }
             : message
         )
       );
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Error updating readorno:",
-        error.response ? error.response.data : error.message
-      );
-      throw error;
-    }
-  };
-  // Define the function to handle user clicks
-  const UserClick = async (User, lastMessage) => {
-    setSelectedUser(User);
-    localStorage.setItem("SelectedUser", JSON.stringify(User));
-    if (lastMessage && lastMessage.from && lastMessage.to) {
-      await ReadOrNo(lastMessage.from, lastMessage.to);
-    } else {
-      // console.warn("lastMessage or its properties are undefined");
     }
 
-    // Scroll messages to the end
-    const scrollMessagesToEnd = () => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-        }
-    };
-    const timeout = setTimeout(() => {
-        scrollMessagesToEnd();
-    }, 1);
-    return () => clearTimeout(timeout);
-    };
-
-  //  search input change
-  const SearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  // Scroll To End
-  useEffect(() => {
-    const scrollMessagesToEnd = () => {
+    // Scroll to the end of messages
+    setTimeout(() => {
       if (messagesEndRef.current) {
         messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
       }
-    };
-    const timeout = setTimeout(() => {
-      scrollMessagesToEnd();
     }, 1);
-    return () => clearTimeout(timeout);
-  }, [messages]);
 
+  } catch (error) {
+    console.error(
+      "Error handling user click:",
+      error.response ? error.response.data : error.message
+    );
+  }
+  };
+  // Function to safely highlight search text
   const safeHighlightText = (text) => {
     if (!searchQuery.trim()) return text;
     const regex = new RegExp(`(${searchQuery.trim()})`, "gi");
     const highlightedText = text.replace(regex, "<b>$1</b>");
     return DOMPurify.sanitize(highlightedText);
   };
+  // Filter users who have exchanged messages with the logged-in user
   const filteredUserDetails = userDetails.filter(userDetail =>
     userDetail.email === EmailUser ||
     messages.some(msg =>
@@ -104,6 +82,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
       (msg.to === EmailUser && msg.from === userDetail.email)
     )
   );
+  // Map users to include their last message and sort by last message date
   const userWithLastMessages = filteredUserDetails.map(User => {
     const lastMessage = messages
       .filter(msg =>
@@ -124,7 +103,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
           type="search"
           placeholder="Search by Name or Email"
           value={searchQuery}
-          onChange={SearchChange}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full px-4 py-2 mb-4 rounded-md bg-gray-700 text-white focus:outline-none"
         />
         {/* Users List */}
@@ -223,7 +202,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
                         <div
                         key={i}
                         onClick={() => {
-                          UserClick(User, lastMessage);
+                          handleUserClick(User, lastMessage);
                           router.push(`/message/to/${User.username}`)
                         }}
                         className={`${

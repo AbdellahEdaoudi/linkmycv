@@ -9,25 +9,20 @@ import { useRouter } from 'next/navigation';
 export const MyContext = createContext();
 
 export const MyProvider = ({ children }) => {
-  const router = useRouter()
-  const [userDetails, setUserDetails] = useState([]);
-  const [userLinks, setUserLinks] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [friendRequests, setFriendRequests] = useState([]);
-  const [socket, setSocket] = useState(null);
-  const {data,status} = useSession()
-  const EmailUser = data?.user?.email
-  const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
-  const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
-  
-
-
-  // const CLIENT_URL = "http://localhost:3000";
-  // const SERVER_URL = "http://localhost:9999" ;
-  // const SERVER_URL_V = "http://localhost:9999" ;
-   const CLIENT_URL = "https://linkerfolio.vercel.app";
-   const SERVER_URL = "https://server-linkerfolio.onrender.com";
-   const SERVER_URL_V = "https://server-linkerfolio.vercel.app";
+   const [userDetails, setUserDetails] = useState([]);
+   const [userLinks, setUserLinks] = useState([]);
+   const [messages, setMessages] = useState([]);
+   const [friendRequests, setFriendRequests] = useState([]);
+   const [socket, setSocket] = useState(null);
+   const {data,status} = useSession()
+   const EmailUser = data?.user?.email
+   const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
+   const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
+   const [loadingUsers, setLoadingUsers] = useState(false);
+   const [loadingMessages, setLoadingMessages] = useState(false);
+   const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ;
+   const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
+   const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
   // socket.io
   useEffect(() => {
@@ -72,6 +67,7 @@ export const MyProvider = ({ children }) => {
       socket.disconnect();
     };
   }, [SERVER_URL]);
+
   useEffect(() => {
     const email = EmailUser; 
     if (email) {
@@ -83,36 +79,46 @@ export const MyProvider = ({ children }) => {
   
   // Get users
   useEffect(() => {
-    axios.get(`${SERVER_URL_V}/users`,{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
-      })
-      .then((res) => {
+    const fetchUsers = async () => {
+      setLoadingUsers(true); // بدأ اللودينغ
+      try {
+        const res = await axios.get(`${SERVER_URL_V}/users`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
+          }
+        });
         setUserDetails(res.data);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching user details:", error);
-      });
+      } finally {
+        setLoadingUsers(false); // انتهاء اللودينغ
+      }
+    };
+
+    fetchUsers();
   }, [SERVER_URL_V]);
-  
-  // getMessages
+
+  // Get messages
   useEffect(() => {
     const getMessages = async () => {
+      setLoadingMessages(true); // بدأ اللودينغ
       try {
-        const response = await axios.get(`${SERVER_URL_V}/messages`,{
+        const response = await axios.get(`${SERVER_URL_V}/messages/${EmailUser}`, {
           headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
           }
         });
         setMessages(response.data);
       } catch (error) {
         console.error("Error fetching messages:", error);
+      } finally {
+        setLoadingMessages(false); // انتهاء اللودينغ
       }
     };
 
     getMessages();
-  }, [SERVER_URL_V]);
+  }, [EmailUser, SERVER_URL_V]);
+
   // Get links
   useEffect(() => {
     axios
@@ -198,7 +204,7 @@ const Requests = friendRequests
         setMessages,
         socket,
         friendRequests, setFriendRequests,
-        Requests
+        Requests , loadingMessages,loadingUsers
       }}
     >
       <audio ref={audioRef} src="/notification3.mp3" preload="auto" />

@@ -8,7 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default  function Home() {
-  const { userDetails, EmailUser } = useContext(MyContext);
+  const { userDetails, EmailUser,loadingMessages,loadingUsers } = useContext(MyContext);
   const { data, status } = useSession();
   const Router = useRouter();
   useEffect(() => {
@@ -17,7 +17,7 @@ export default  function Home() {
     }
   }, [status, Router]);
   
-  if (!userDetails || userDetails.length === 0) {
+  if (loadingMessages || loadingUsers) {
     return <LoadChatPage />;
   }
   const filt = userDetails.find((fl) => fl.email === EmailUser);

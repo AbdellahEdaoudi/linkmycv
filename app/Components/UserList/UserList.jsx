@@ -4,75 +4,56 @@ import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { MyContext } from "../../Context/MyContext";
 import DOMPurify from 'dompurify';
-import LUserList from "../Loading/LoadChatPage/LUserList";
 
 function UserList({ selectedUser, setSelectedUser }) {
-  const {userDetails,EmailUser,SERVER_URL_V,SERVER_URL,messages, setMessages}=useContext(MyContext);
+  const {userDetails,EmailUser,SERVER_URL_V,messages, setMessages}=useContext(MyContext);
   const [searchQuery,setSearchQuery] = useState("");
   const messagesEndRef = useRef(null);
 
-
-  const ReadOrNo = async (fromEmail,toEmail) => {
-    try {
-      const response = await axios.put(`${SERVER_URL_V}/readorno`, {
-        fromEmail,
-        toEmail,
-      },{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
+  // Handle User Click
+    const handleUserClick = async (User, lastMessage) => {
+      try {
+        setSelectedUser(User);
+        localStorage.setItem("SelectedUser", JSON.stringify(User));
+        if (lastMessage?.from && lastMessage?.to) {
+          await axios.put(
+            `${SERVER_URL_V}/readorno`,
+            {
+              fromEmail: lastMessage.from,
+              toEmail: lastMessage.to,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+              },
+            }
+          );
+          setMessages((prevMessages) =>
+            prevMessages.map((message) =>
+              message.from === lastMessage.from &&
+              message.to === lastMessage.to &&
+              message.readorno === false
+                ? { ...message, readorno: true }
+                : message
+            )
+          );
         }
-      });
-      const from = response.data.result[0].from
-      const to = response.data.result[0].to
-      setMessages(prevMessages =>
-        prevMessages.map(message =>
-          message.from === from && message.to === to && message.readorno === false
-            ? { ...message, readorno: true }
-            : message
-        )
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Error updating readorno:",
-        error.response ? error.response.data : error.message
-      );
-      throw error;
-    }
-  };
-  // Define the function to handle user clicks
-  const UserClick = async (User, lastMessage) => {
-    setSelectedUser(User);
-    localStorage.setItem("SelectedUser", JSON.stringify(User));
-    if (lastMessage && lastMessage.from && lastMessage.to) {
-      await ReadOrNo(lastMessage.from, lastMessage.to);
-    } else {
-      // console.warn("lastMessage or its properties are undefined");
-    }
-
-    // Scroll messages to the end
-    const scrollMessagesToEnd = () => {
-        if (messagesEndRef.current) {
+        // Scroll to the end of messages
+        setTimeout(() => {
+          if (messagesEndRef.current) {
             messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-        }
+          }
+        }, 1);
+      
+      } catch (error) {
+        console.error(
+          "Error handling user click:",
+          error.response ? error.response.data : error.message
+        );
+      }
     };
-    const timeout = setTimeout(() => {
-        scrollMessagesToEnd();
-    }, 1);
-    return () => clearTimeout(timeout);
-    };
-    // Scroll To End
-    useEffect(() => {
-      const scrollMessagesToEnd = () => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-        }
-      };
-      const timeout = setTimeout(() => {
-        scrollMessagesToEnd();
-      }, 1);
-      return () => clearTimeout(timeout);
-    }, [messages]);
+    
+
     const filteredSearchUser = userDetails
     .filter(
       (user) =>
@@ -92,13 +73,6 @@ function UserList({ selectedUser, setSelectedUser }) {
       const highlightedText = text.replace(regex, "<b>$1</b>");
       return DOMPurify.sanitize(highlightedText);
     };
-    if (!userDetails || !messages ||  messages.length === 0 || !EmailUser ) {
-      return (
-        <div className="p-4 ">
-          <LUserList />
-        </div>
-      )
-    }
     const filteredUserDetails = userDetails.filter(userDetail =>
       userDetail.email === EmailUser ||
       messages.some(msg =>
@@ -200,7 +174,7 @@ function UserList({ selectedUser, setSelectedUser }) {
       return (
         <div
           key={i}
-          onClick={() => UserClick(User, lastMessage)}
+          onClick={() => handleUserClick(User, lastMessage)}
           className={`${
             searchQuery === "" ? "" : "hidden"
           } mt-1 flex relative items-center gap-4 p-2 duration-500 hover:bg-gray-700 cursor-pointer rounded-lg transition ${
