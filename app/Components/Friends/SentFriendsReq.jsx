@@ -55,7 +55,7 @@ function SentFriendsReq() {
   useEffect(() => {
     const fetchFriendRequests = async () => {
       try {
-        const response = await axios.get(`${SERVER_URL_V}/friend`,{
+        const response = await axios.get(`${SERVER_URL_V}/friend/${EmailUser}`,{
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
           }

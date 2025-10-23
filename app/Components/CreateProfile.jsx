@@ -12,7 +12,7 @@ const CreateProfile = () => {
   const { data, status } = useSession();
   const EmailUser = data?.user?.email;
   const fullName = data?.user?.name;
-  const UrlImage = data?.user?.image;
+  const UrlImage = "https://res.cloudinary.com/dssrnghtr/image/upload/v1761258566/dgmlr4uuim5swutkp6a8.png";
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");

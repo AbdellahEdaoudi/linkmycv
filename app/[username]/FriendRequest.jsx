@@ -96,7 +96,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   useEffect(() => {
     const GetFriendRequest = async () => {
       try {
-        const response = await axios.get(`${SERVER_URL_V}/friend`, {
+        const response = await axios.get(`${SERVER_URL_V}/friend/${EmailUser}`, {
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
           }
@@ -110,7 +110,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       }
     };
     GetFriendRequest();
-  }, [SERVER_URL_V]);
+  }, [SERVER_URL_V,EmailUser]);
   // SendFriendRequest
   const SendFriendRequest = async () => {
     setLoading(true);

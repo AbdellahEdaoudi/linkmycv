@@ -257,7 +257,7 @@ function GetUserByUsername({ params }) {
               <UserLinks language={language} setLanguage={setLanguage} emailuser={emailuser} />
             </div>
              </div>
-             
+             {userDetailsG.urlimage}
             {/* Social Media */}
             <div>
             <SocialMedia userDetailsG={userDetailsG} />
