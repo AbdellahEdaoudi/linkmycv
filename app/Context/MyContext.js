@@ -105,7 +105,7 @@ export const MyProvider = ({ children }) => {
     const getMessages = async () => {
       setLoadingMessages(true); // بدأ اللودينغ
       try {
-        const response = await axios.get(`${SERVER_URL_V}/messages/${EmailUser}`, {
+        const response = await axios.get(`${SERVER_URL}/messages/${EmailUser}`, {
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
           }
@@ -119,7 +119,7 @@ export const MyProvider = ({ children }) => {
     };
 
     getMessages();
-  }, [EmailUser, SERVER_URL_V]);
+  }, [EmailUser, SERVER_URL]);
 
   // Get links
   useEffect(() => {
