@@ -136,13 +136,13 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
               }}
               className="flex items-center flex-shrink-0 md:w-auto  hover:scale-105 duration-300 cursor-pointer"
             >
-              <Image src="/favicon.png" alt="Logo" width={45} height={15} />
+              <Image src="/favicon.png" alt="Logo" width={45} height={45} />
               <Image
                 src="/Logo.png"
                 alt="Logo"
                 width={160}
-                className="md:block sm:block hidden"
-                height={15}
+                height={70}
+                className="md:block sm:block hidden w-auto h-auto"
               />
             </div>
             {/* SEARCHE */}
@@ -256,7 +256,7 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
                 </div>
               ))}
             {status === "unauthenticated" && <SignInWithGoogle />}
-            {(status === "loading" || loadingUsers) && (
+            {(status === "loading" || loadingUsers || userDetails.length === 0) && (
               <div className={`${status === "unauthenticated" && "hidden"} flex md:flex-row flex-row-reverse items-center gap-2`}>
                 <div className="w-11 h-11 bg-gray-300 rounded-full"></div>
                 <div>

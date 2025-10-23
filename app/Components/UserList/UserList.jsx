@@ -136,8 +136,9 @@ function UserList({ selectedUser, setSelectedUser }) {
                           <Image
                             src={User.urlimage}
                             alt="Profile"
-                            className="rounded-full "
-                            layout="fill"
+                            className="rounded-full w-auto h-auto"
+                            width={60} height={60}
+                            
                           />
                           {/* <div className={` ${User.isOnline === false ? "bg-gray-500": "bg-green-500"} absolute w-2 h-2 rounded-full left-2 top-0`}></div> */}
                         </div>
@@ -185,8 +186,8 @@ function UserList({ selectedUser, setSelectedUser }) {
             <Image
               src={User.urlimage}
               alt="Profile"
-              className="rounded-full"
-              layout="fill"
+              className="rounded-full w-auto h-auto"
+              width={60} height={60}
             />
           </div>
           <div className="flex flex-col">

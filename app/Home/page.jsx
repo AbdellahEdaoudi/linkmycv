@@ -17,7 +17,7 @@ export default  function Home() {
     }
   }, [status, Router]);
   
-  if (loadingMessages || loadingUsers) {
+  if (loadingMessages || loadingUsers || userDetails.length === 0) {
     return <LoadChatPage />;
   }
   const filt = userDetails.find((fl) => fl.email === EmailUser);
