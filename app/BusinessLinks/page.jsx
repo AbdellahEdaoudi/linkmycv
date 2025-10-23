@@ -5,7 +5,7 @@ import { MyContext } from '../Context/MyContext';
 import axios from 'axios';
 import { toast } from "sonner";
 import CreateProfile from '../Components/CreateProfile';
-import LoadChatPage from '../Home/Components/Loading/LoadChatPage';
+import LoadChatPage from '../Components/Loading/LoadChatPage';
 import ParticleComponent  from "../Components/ParticleComponent"
 import DOMPurify from 'dompurify';
 import WarningModal from "./Pages/WarningModal"
