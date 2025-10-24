@@ -71,11 +71,10 @@ export const MyProvider = ({ children }) => {
   }, [SERVER_URL]);
 
   useEffect(() => {
-    const email = EmailUser; 
-    if (email) {
-      socket.emit('userConnected',email);
+    if (EmailUser) {
+      socket.emit('userConnected',EmailUser);
     } else {
-      console.error('User email is not available.');
+      // console.error('User email is not available.');
     }
   }, [EmailUser, socket]);
   
@@ -105,10 +104,10 @@ export const MyProvider = ({ children }) => {
       const findme = userDetails.find((user) => user.email === EmailUser);
       const storedUser = localStorage.getItem("SelectedUser");
         if (storedUser) {
-          setSelectedUser(JSON.parse(storedUser));
+          setSelectedUser();
         }
         else if (findme) {
-          setSelectedUser(findme);
+          setSelectedUser(JSON.parse(findme));
       }
     }
    }, [EmailUser]);
