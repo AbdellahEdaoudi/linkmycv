@@ -133,7 +133,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
                     className="text-lg"
                     dangerouslySetInnerHTML={{ __html: safeHighlightText(user.fullname) }}
                   />
-                  <p className="text-[10px] text-gray-400" dangerouslySetInnerHTML={{
+                  <p className=" hidden text-[10px] text-gray-400" dangerouslySetInnerHTML={{
                     __html: safeHighlightText(user.email),
                   }} />
                   <p className="text-[14px] text-gray-400 line-clamp-1">

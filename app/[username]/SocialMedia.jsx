@@ -73,7 +73,7 @@ function SocialMedia({userDetailsG}) {
         },
       ];
   return (
-    <div className="flex flex-wrap gap-4 justify-center my-1 ">
+    <div className="flex flex-wrap gap-4 justify-start my-1 ">
               {datasocial
                 .filter((social) => social.link)
                 .map((social, i) => (
@@ -90,7 +90,7 @@ function SocialMedia({userDetailsG}) {
                       width={22}
                       height={22}
                     />
-                    {/* <span className="ml-2 text-gray-800 font-medium">{social.alt}</span> */}
+                    {/* <span className={`ml-2 text-gray-800 font-medium`}>{social.alt}</span> */}
                   </a>
                 ))}
             </div>

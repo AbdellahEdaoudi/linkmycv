@@ -16,7 +16,9 @@ import Image from "next/image";
 import io from "socket.io-client";
 
 function FriendRequest({ emailuser, path, userDetailsG }) {
-  const { SERVER_URL_V, SERVER_URL, userDetails, EmailUser } =
+  const { SERVER_URL_V, SERVER_URL, userDetails, EmailUser,
+    loadingFriendRequests
+  } =
     useContext(MyContext);
   const router = useRouter();
   const [friendRequests, setFriendRequests] = useState([]);
@@ -24,8 +26,6 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   const [LoadingD, setLoadingD] = useState(false);
   const [from, setfrom] = useState("");
   const [To, setTo] = useState("");
-  const [fromf, setfromf] = useState("");
-  const [Tof, setTof] = useState("");
   const [friendId, setfriendId] = useState("");
   const [socket, setSocket] = useState(null);
 
@@ -55,15 +55,14 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
           (f.to === EmailUser || f.to === emailuser)
       );
       if (userF) {
-        setfromf(userF.email);
-        setTof(userF.to);
         setfriendId(userF._id);
       } else {
-        // console.log("User not found in friendRequests");
+        console.log("User not found in friendRequests");
       }
     }
   }, [friendRequests, EmailUser, emailuser]);
 
+  // Socket.io
   useEffect(() => {
     const socket = io(SERVER_URL);
     setSocket(socket);
@@ -91,7 +90,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       socket.off("receiveDeletedFriendRequest");
     };
   }, [SERVER_URL]);
-
+  
   // GetFriendRequest
   useEffect(() => {
     const GetFriendRequest = async () => {
@@ -111,6 +110,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
     };
     GetFriendRequest();
   }, [SERVER_URL_V,EmailUser]);
+
   // SendFriendRequest
   const SendFriendRequest = async () => {
     setLoading(true);
@@ -135,7 +135,6 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       setLoading(false);
     }
   };
-
   // UpdateFriendRequest
   const UpdateFriendRequest = async () => {
     setLoading(true);
@@ -179,7 +178,8 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       setLoadingD(false);
     }
   };
-  if (friendRequests.length === 0 || !friendRequests) {
+
+  if (loadingFriendRequests || !friendRequests) {
     return <div className="p-1 border rounded-full flex items-center animate-spin justify-center">
       {/* <Loader /> */}
       <LoaderPinwheel />

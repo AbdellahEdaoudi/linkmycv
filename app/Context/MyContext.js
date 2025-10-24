@@ -27,11 +27,15 @@ export const MyProvider = ({ children }) => {
    const audioRef = useRef(null);
    const [selectedUser, setSelectedUser] = useState(null);
    useEffect(() => {
-     const storedUser = localStorage.getItem("SelectedUser");
+    const findme = userDetails.find((user) => user.email === EmailUser);
+    const storedUser = localStorage.getItem("SelectedUser");
      if (storedUser) {
        setSelectedUser(JSON.parse(storedUser));
      }
-   }, []);
+     else if (findme) {
+       setSelectedUser(findme);
+     }
+   }, [EmailUser]);
 
   // socket.io
   useEffect(() => {

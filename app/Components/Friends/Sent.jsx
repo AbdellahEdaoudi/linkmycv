@@ -10,9 +10,8 @@ import { UserMinus } from 'lucide-react';
 
 function Sent() {
     const { SERVER_URL_V, EmailUser, userDetails,
-        friendRequests,socket} =
+        friendRequests,socket,loadingFriendRequests} =
         useContext(MyContext);
-    const [requests, setRequests] = useState([]);
     const [loadingStatus, setLoadingStatus] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
@@ -37,9 +36,8 @@ function Sent() {
                   'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
                 }
               });
-            setRequests((prev) => prev.filter((req) => req._id !== requestId));
-            socket.emit('deleteFriendRequest', requestId);
             toast('Request deleted successfully');
+            socket.emit('deleteFriendRequest', requestId);
         } catch (error) {
             console.error('Error deleting request:', error.message);
             toast.error('Failed to delete request');
@@ -63,9 +61,9 @@ return (
             />
         </div>
 
-        {!friendRequests ? (
+        {loadingFriendRequests ? (
             <div className='rounded-md mb-2 w-full flex-1'>
-            {[1].map((_, i) => (
+            {[2].map((_, i) => (
                 <div key={i} className='p-3 hover:scale-95 duration-300 bg-gray-800 w-full rounded-md mb-2 flex justify-between gap-5'>
                     <div className='flex items-center gap-1'>
                         <div className='w-9 h-9 bg-gray-400 rounded-full animate-pulse'></div>
@@ -137,7 +135,7 @@ return (
                 }
             </div>
         )}
-        {frCount === 0 && (
+        {!loadingFriendRequests &&frCount === 0 && (
             <p className="text-sm py-5 flex items-center justify-center">No friend requests sent</p>
 
         )}

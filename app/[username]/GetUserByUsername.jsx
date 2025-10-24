@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Link,
@@ -32,19 +32,42 @@ import { signIn, useSession } from "next-auth/react";
 import SocialMedia from "./SocialMedia"
 import AccountNotFound from '../Components/AccountNotFound'
 import ParticleComponent from "../Components/ParticleComponent";
+import axios from "axios";
 
 function GetUserByUsername({ params }) {
   const { data, status } = useSession();
   const router = useRouter()
   const path = usePathname();
-  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser,
-         loadingUsers,      
-        }=useContext(MyContext);
-  const userDetailsG = userDetails.find((user)=>user.username === params.username)
+  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser}=useContext(MyContext);
   const [copied, setCopied] = useState(false);
-  const [translatedDetails, setTranslatedDetails] = useState(null);
+  const [userDetailsG, setuserDetailsG] = useState([]);
+  const [userLinks, setUserLinks] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [language, setLanguage] = useState('');
   const filt = userDetails.find((fl) => fl.email === EmailUser);
+
+  // Get users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoadingUsers(true); 
+      try {
+        const res = await axios.get(`${SERVER_URL_V}/user/${params.username}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
+          }
+        });
+        setuserDetailsG(res.data.user);
+        setUserLinks(res.data.links);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [SERVER_URL_V]);
+
   const CopyLinkProfil = () => {
     const urlToCopy = `${CLIENT_URL}${path}`;
     navigator.clipboard.writeText(urlToCopy).then(() => {
@@ -53,77 +76,55 @@ function GetUserByUsername({ params }) {
       setTimeout(() => setCopied(false), 2000);
     });
   };
+  if (status === 'unauthenticated') {
+    signIn("google", {redirect:true, callbackUrl:`/${userDetailsG?.username}`})
+  }
 
-
-    if (loadingUsers || userDetails.length === 0) {
-      return <Loadingpage />
-
-    }
+  if (loadingUsers || userDetails.length === 0) {
+    return <Loadingpage />
+  }
   
-      if (!userDetailsG && !loadingUsers) {
-      return (
-        <div>
-          <AccountNotFound />
-        </div>
-          );
-        }
+  if (!userDetailsG && !loadingUsers) {
+  return (
+    <div>
+      <AccountNotFound />
+    </div>
+      );
+    }
 
   const datamodul = [
-    {
-      name: translatedDetails 
-        ? `🔷 ${translatedDetails.Summary}` 
-        : "🔷 Summary",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Summary} 🔷` : `🔷 ${translatedDetails.Summary}`}` 
-        : "🔷 Summary",
-      data: translatedDetails && translatedDetails.bio ? translatedDetails.bio : userDetailsG.bio
-    },
-    {
-      name: translatedDetails 
-        ? `💼 ${translatedDetails.Services}` 
-        : "💼 Services",
-       namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Services} 💼` : `💼 ${translatedDetails.Services}`}` 
-        : "💼 Services",
-      data: translatedDetails && translatedDetails.services ? translatedDetails.services : userDetailsG.services
-    },
-    {
-      name: translatedDetails 
-        ? `🎓 ${translatedDetails.Education}` 
-        : "🎓 Education",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Education} 🎓` : `🎓 ${translatedDetails.Education}`}` 
-        : "🎓 Education",
-      data: translatedDetails && translatedDetails.education ? translatedDetails.education : userDetailsG.education
-    },
-    {
-      name: translatedDetails 
-        ? `⭐ ${translatedDetails.Experience}` 
-        : "⭐ Experience",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Experience} ⭐` : `⭐ ${translatedDetails.Experience}`}` 
-        : "⭐ Experience",
-      data: translatedDetails && translatedDetails.experience ? translatedDetails.experience : userDetailsG.experience
-    },
-    {
-      name: translatedDetails 
-        ? `💡 ${translatedDetails.Skills}` 
-        : "💡 Skills",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Skills} 💡` : `💡 ${translatedDetails.Skills}`}` 
-        : "💡 Skills",
-      data: translatedDetails && translatedDetails.skills ? translatedDetails.skills : userDetailsG.skills
-    },
-    {
-      name: translatedDetails 
-        ? `🌍 ${translatedDetails.Languages}` 
-        : "🌍 Languages",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Languages} 🌍` : `🌍 ${translatedDetails.Languages}`}` 
-        : "🌍 Languages",
-      data: translatedDetails && translatedDetails.languages ? translatedDetails.languages : userDetailsG.languages
-    }
-  ];
+  {
+    name: "🔷 Summary",
+    namedata: "🔷 Summary",
+    data: userDetailsG.bio
+  },
+  {
+    name: "💼 Services",
+    namedata: "💼 Services",
+    data: userDetailsG.services
+  },
+  {
+    name: "🎓 Education",
+    namedata: "🎓 Education",
+    data: userDetailsG.education
+  },
+  {
+    name: "⭐ Experience",
+    namedata: "⭐ Experience",
+    data: userDetailsG.experience
+  },
+  {
+    name: "💡 Skills",
+    namedata: "💡 Skills",
+    data: userDetailsG.skills
+  },
+  {
+    name: "🌍 Languages",
+    namedata: "🌍 Languages",
+    data: userDetailsG.languages
+  }
+];
+
   
   
   
@@ -141,42 +142,41 @@ function GetUserByUsername({ params }) {
   const emailuser = userDetailsG?.email;
 
   const CV = [
-    {
-      title: `${translatedDetails ? `🔷 ${translatedDetails.Summary}` : "🔷 Summary"}`,
-      content: translatedDetails && translatedDetails.bio ? translatedDetails.bio : userDetailsG.bio,
-      key: translatedDetails ? translatedDetails.bioKey || 'bio' : 'bio'
-    },
-    {
-      title: `${translatedDetails ? `💼 ${translatedDetails.Services}` : "💼 Services"}`,
-      content: translatedDetails && translatedDetails.services ? translatedDetails.services : userDetailsG.services,
-      key: translatedDetails ? translatedDetails.servicesKey || 'services' : 'services'
-    },
-    {
-      title: `${translatedDetails ? `🎓 ${translatedDetails.Education}` : "🎓 Education"}`,
-      content: translatedDetails && translatedDetails.education ? translatedDetails.education : userDetailsG.education,
-      key: translatedDetails ? translatedDetails.educationKey || 'education' : 'education'
-    },
-    {
-      title: `${translatedDetails ? `⭐ ${translatedDetails.Experience}` : "⭐ Experience"}`,
-      content: translatedDetails && translatedDetails.experience ? translatedDetails.experience : userDetailsG.experience,
-      key: translatedDetails ? translatedDetails.experienceKey || 'experience' : 'experience'
-    },
-    {
-      title: `${translatedDetails ? `💡 ${translatedDetails.Skills}` : "💡 Skills"}`,
-      content: translatedDetails && translatedDetails.skills ? translatedDetails.skills : userDetailsG.skills,
-      key: translatedDetails ? translatedDetails.skillsKey || 'skills' : 'skills'
-    },
-    {
-      title: `${translatedDetails ? `🌍 ${translatedDetails.Languages}` : "🌍 Languages"}`,
-      content: translatedDetails && translatedDetails.languages ? translatedDetails.languages : userDetailsG.languages,
-      key: translatedDetails ? translatedDetails.languagesKey || 'languages' : 'languages'
-    }
-  ];
-  if (status === 'unauthenticated') {
-    signIn("google", {redirect:true, callbackUrl:`/${userDetailsG?.username}`})
+  {
+    title: "🔷 Summary",
+    content: userDetailsG.bio,
+    key: "bio"
+  },
+  {
+    title: "💼 Services",
+    content: userDetailsG.services,
+    key: "services"
+  },
+  {
+    title: "🎓 Education",
+    content: userDetailsG.education,
+    key: "education"
+  },
+  {
+    title: "⭐ Experience",
+    content: userDetailsG.experience,
+    key: "experience"
+  },
+  {
+    title: "💡 Skills",
+    content: userDetailsG.skills,
+    key: "skills"
+  },
+  {
+    title: "🌍 Languages",
+    content: userDetailsG.languages,
+    key: "languages"
   }
+ ];
+
+  
   return (
-    <div className={`flex items-start justify-center h-screen text-xs sm:text-base md:text-base  pt-4  pb-20 relative ${userDetailsG.bgcolorp}`}>
+    <div className={`flex items-start justify-center  text-xs sm:text-base md:text-base  pt-4  pb-20 relative ${userDetailsG.bgcolorp}`}>
       <ParticleComponent  bgcolor={userDetailsG.bgcolorp} /> 
       <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
         {/* Image Profile and info user */}
@@ -254,10 +254,9 @@ function GetUserByUsername({ params }) {
              )}
             {/* Business Links */}
             <div className={`${language === "ar" && "text-right"} `}>
-              <UserLinks language={language} setLanguage={setLanguage} emailuser={emailuser} />
+              <UserLinks userLinks={userLinks} />
             </div>
              </div>
-             {userDetailsG.urlimage}
             {/* Social Media */}
             <div>
             <SocialMedia userDetailsG={userDetailsG} />
@@ -316,7 +315,7 @@ function GetUserByUsername({ params }) {
         </nav>
         {/* Category */}
         <p className="text-base font-semibold text-center text-gray-800 bg-gray-100 p-2 my-2 rounded border border-gray-300">
-        {`${translatedDetails ? translatedDetails.category : userDetailsG.category}`}
+        {`${userDetailsG.category}`}
         </p>
         {/* Modul */}
         <div className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} flex flex-wrap justify-center  gap-2 mb-2`}>

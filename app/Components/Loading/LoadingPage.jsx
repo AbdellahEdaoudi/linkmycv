@@ -1,5 +1,6 @@
 import { MailCheck, MapPin, Phone } from 'lucide-react'
 import React from 'react'
+import ParticleComponent from '../ParticleComponent'
 
 function Loadingpage() {
     const datamodul = [
@@ -12,6 +13,7 @@ function Loadingpage() {
       ]
   return (
     <div className={` flex items-start justify-center   pt-4 pb-96 `}>
+      <ParticleComponent  bgcolor={""} /> 
         <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
             {/* Image Profile and info user */}
            <div className=" border flex flex-col pb-6 md:flex-row md:items-start items-center mb-4 p-4 bg-white rounded-lg shadow-md">

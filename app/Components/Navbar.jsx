@@ -146,7 +146,7 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
               />
             </div>
             {/* SEARCHE */}
-            <div className="md:mx-0 mx-2">
+            <div className={`md:mx-0 mx-2 ${status === "unauthenticated" && "hidden"}`}>
               <div className="flex items-center bg-gray-100 border shadow-sm border-gray-300 rounded-lg   md:w-96 max-w-md">
                 <div className=" p-2 text-gray-500 ">
                   <UserRoundSearch />
@@ -340,7 +340,10 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
         </Link>
         <div
           onClick={() => {
-            signOut();
+            signOut({
+              callbackUrl: "/",
+              redirect: true,
+            });
           }}
           className="bg-red-500 py-2 border-b cursor-pointer border-gray-600 hover:bg-red-600 transition duration-300 rounded-sm hover:scale-105 justify-center flex gap-2"
         >
@@ -508,7 +511,7 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
         </div>
         {FRS_FRREQ()}
       </nav>
-      {/* Searche */}
+      {/* data Searche */}
       <nav
         onClick={() => {setSearch("");}}
         className={`fixed  w-full flex justify-center ${search === ""
@@ -522,7 +525,6 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
           } transition-all duration-500 ease-in-out`}
         ></div>
       </nav>
-
       <div
         className={`fixed top-20 left-1/2 w-full transform -translate-x-1/2 bg-white rounded-lg shadow-lg ${
           search === ""

@@ -10,9 +10,8 @@ import { UserX } from "lucide-react";
 
 function Friends() {
   const { SERVER_URL_V, EmailUser, userDetails,
-    friendRequests,socket} =
+    friendRequests,socket,loadingFriendRequests} =
     useContext(MyContext);
-  const [requests, setRequests] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
@@ -36,9 +35,8 @@ function Friends() {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
         },
       });
-      setRequests((prev) => prev.filter((req) => req._id !== requestId));
-      socket.emit("deleteFriendRequest", requestId);
       toast("Unfriend successfully");
+      socket.emit("deleteFriendRequest", requestId);
     } catch (error) {
       console.error("Error deleting request:", error.message);
       toast.error("Failed to delete request");
@@ -85,9 +83,9 @@ function Friends() {
         />
       </div>
 
-      {!friendRequests ? (
+      {loadingFriendRequests ? (
         <div className="rounded-md mb-2 w-full flex-1">
-          {[1].map((_, i) => (
+          {[2].map((_, i) => (
             <div
               key={i}
               className="p-3 hover:scale-95 duration-300 bg-gray-800 w-full rounded-md mb-2 flex justify-between gap-5"
@@ -119,7 +117,7 @@ function Friends() {
 
             return (
               <div key={i}>
-                <div className=" hover:scale-95 duration-300 shadow-lg mb-2 bg-gray-800 rounded-xl flex flex-row items-center justify-between">
+                <div className="  hover:scale-95 duration-300 shadow-lg mb-2 bg-gray-800 rounded-xl flex flex-row items-center justify-between">
                   <div className="flex flex-row items-center px-4 py-3 gap-2">
                     <Image
                       onClick={() => router.push(`/${user.username}`)}
@@ -142,6 +140,7 @@ function Friends() {
                       </span>
                     </div>
                   </div>
+                  {/* // Unfriend button */}
                   <div className="flex flex-row-reverse gap-2 mr-4">
                     <button
                       className="bg-blue-600 text-xs hover:scale-95 rounded-lg p-1 duration-200"
@@ -166,9 +165,9 @@ function Friends() {
           })}
         </div>
       )}
-      {FriendsCount === 0 && (
+      {(!loadingFriendRequests && filteredRequests.length === 0) && (
         <p className="text-sm py-5 flex items-center justify-center">
-          No pending friend requests
+          You have no friends yet
         </p>
       )}
     </div>

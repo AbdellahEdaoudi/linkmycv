@@ -32,20 +32,43 @@ import { useSession } from "next-auth/react";
 import SocialMedia from "../SocialMedia"
 import Loadingpage from "../../Components/Loading/LoadingPage";
 import LoadingPagetranslate from "../../Components/Loading/LoadingPagetranslate";
+import ParticleComponent from "../../Components/ParticleComponent";
 
 function Page({ params }) {
-  const { data, status } = useSession();
-  const router = useRouter();
-  const [userDetailsG, setUserDetailsG] = useState(null);
-  const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
-  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser}=useContext(MyContext);
-  const [translatedDetails, setTranslatedDetails] = useState(null);
+ const { data, status } = useSession();
+  const router = useRouter()
   const path = usePathname();
-  const lg = path.split("/")[2]
-  const [loading, setLoading] = useState(true); 
-  const [language, setLanguage] = useState(lg);
+  const {CLIENT_URL,SERVER_URL_V,userDetails,EmailUser}=useContext(MyContext);
+  const [copied, setCopied] = useState(false);
+  const [userDetailsG, setuserDetailsG] = useState([]);
+  const [userLinks, setUserLinks] = useState([]);
+  const [labels, setlabels] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const filt = userDetails.find((fl) => fl.email === EmailUser);
+  const language = params.Ln;
+
+  // Get users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoadingUsers(true); 
+      try {
+        const res = await axios.get(`${SERVER_URL_V}/user/${params.username}/${params.Ln}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
+          }
+        });
+        setuserDetailsG(res.data.user);
+        setUserLinks(res.data.links);
+        setlabels(res.data.labels);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [SERVER_URL_V,params.Ln,params.username]);
 
   const CopyLinkProfil = () => {
     const urlToCopy = `${CLIENT_URL}${path}`;
@@ -55,151 +78,58 @@ function Page({ params }) {
       setTimeout(() => setCopied(false), 2000);
     });
   };
-
-  // Translate content
-  const translateContent = async (content, lang) => {
-    try {
-      const response = await axios.post(`${SERVER_URL_V}/translate`, {
-        textObject: content,
-        to: lang
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
-        }
-      });
-      setTranslatedDetails(response.data.translations);
-    } catch (error) {
-      toast.error("Translation failed. Please try again later.");
-      console.error('Error translating content:', error);
+  if (status === 'unauthenticated') {
+    signIn("google", {redirect:true, callbackUrl:`/${userDetailsG?.username}`})
+  }
+  if (loadingUsers || userDetails.length === 0) {
+  if (language === "ar") {
+    return <LoadingPagetranslate language={language} bgcolorp="" />;
+  } else {
+    return <Loadingpage />;
+  }
+}
+  
+  if (!userDetailsG && !loadingUsers) {
+  return (
+    <div>
+      <AccountNotFound />
+    </div>
+      );
     }
-  };
 
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${SERVER_URL_V}/user/${params.username}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-          }
-        });
-        setUserDetailsG(response.data);
-          await translateContent({
-            Summary : "Summary",
-            Services : "Services",
-            Education : "Education",
-            Experience : "Experience",
-            Skills : "Skills",
-            Languages : "Languages",
-            bio: response.data.bio,
-            services: response.data.services,
-            education: response.data.education,
-            skills: response.data.skills,
-            languages: response.data.languages,
-            experience: response.data.experience,
-            country: response.data.country,
-            category: response.data.category
-          }, language);
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      } finally {
-        setLoading(false); // Set loading false after fetching
-      }
-    };
-    fetchUserDetails();
-  }, [params.username,SERVER_URL_V, language]);
-
-  if (error) {
-    return (
-      <div className="flex items-start pt-28 justify-center min-h-screen bg-gray-100">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-red-600 mb-4">
-            Account not found
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Sorry, we couldn't find the account you were looking for.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!userDetailsG ) {
-    return (
-      <div>
-        <Loadingpage/>
-      </div>
-    );
-  }
-  if (loading) {
-    return (
-      <div>
-        <LoadingPagetranslate language={language} bgcolorp={userDetailsG.bgcolorp} />
-      </div>
-    );
-  }
   const datamodul = [
-    {
-      name: translatedDetails 
-        ? `🔷 ${translatedDetails.Summary}` 
-        : "🔷 Summary",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Summary} 🔷` : `🔷 ${translatedDetails.Summary}`}` 
-        : "🔷 Summary",
-      data: translatedDetails && translatedDetails.bio ? translatedDetails.bio : userDetailsG.bio
-    },
-    {
-      name: translatedDetails 
-        ? `💼 ${translatedDetails.Services}` 
-        : "💼 Services",
-       namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Services} 💼` : `💼 ${translatedDetails.Services}`}` 
-        : "💼 Services",
-      data: translatedDetails && translatedDetails.services ? translatedDetails.services : userDetailsG.services
-    },
-    {
-      name: translatedDetails 
-        ? `🎓 ${translatedDetails.Education}` 
-        : "🎓 Education",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Education} 🎓` : `🎓 ${translatedDetails.Education}`}` 
-        : "🎓 Education",
-      data: translatedDetails && translatedDetails.education ? translatedDetails.education : userDetailsG.education
-    },
-    {
-      name: translatedDetails 
-        ? `⭐ ${translatedDetails.Experience}` 
-        : "⭐ Experience",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Experience} ⭐` : `⭐ ${translatedDetails.Experience}`}` 
-        : "⭐ Experience",
-      data: translatedDetails && translatedDetails.experience ? translatedDetails.experience : userDetailsG.experience
-    },
-    {
-      name: translatedDetails 
-        ? `💡 ${translatedDetails.Skills}` 
-        : "💡 Skills",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Skills} 💡` : `💡 ${translatedDetails.Skills}`}` 
-        : "💡 Skills",
-      data: translatedDetails && translatedDetails.skills ? translatedDetails.skills : userDetailsG.skills
-    },
-    {
-      name: translatedDetails 
-        ? `🌍 ${translatedDetails.Languages}` 
-        : "🌍 Languages",
-        namedata: translatedDetails 
-        ? `${language === "ar" ? `${translatedDetails.Languages} 🌍` : `🌍 ${translatedDetails.Languages}`}` 
-        : "🌍 Languages",
-      data: translatedDetails && translatedDetails.languages ? translatedDetails.languages : userDetailsG.languages
-    }
-  ];
+  {
+    name: labels?.summary,
+    data: userDetailsG.bio
+  },
+  {
+    name: labels?.services,
+    data: userDetailsG.services
+  },
+  {
+    name: labels?.education,
+    data: userDetailsG.education
+  },
+  {
+    name: labels?.experience,
+    data: userDetailsG.experience
+  },
+  {
+    name: labels?.skills,
+    data: userDetailsG.skills
+  },
+  {
+    name: labels?.languages,
+    data: userDetailsG.languages
+  }
+];
+
   
   
   
   const ListDisk = ( data ) => {
     return (
-      <ul className={`list-disc   ${language === "ar" ? 'list-disc-rtl mr-4' : 'list-disc-ltr ml-4 '}`}>
+      <ul className={`list-disc  ml-4 ${language === "ar" ? 'list-disc-rtl mr-4' : 'list-disc-ltr ml-4 '}`}>
         {data.split("\n").map((item, i) => (
           <li key={i} className="text-base leading-relaxed list-outside">
             {item}
@@ -208,45 +138,46 @@ function Page({ params }) {
       </ul>
     );
   };
-  const emailuser = userDetailsG.email;
+  const emailuser = userDetailsG?.email;
 
   const CV = [
-    {
-      title: `${translatedDetails ? `🔷 ${translatedDetails.Summary}` : "🔷 Summary"}`,
-      content: translatedDetails && translatedDetails.bio ? translatedDetails.bio : userDetailsG.bio,
-      key: translatedDetails ? translatedDetails.bioKey || 'bio' : 'bio'
-    },
-    {
-      title: `${translatedDetails ? `💼 ${translatedDetails.Services}` : "💼 Services"}`,
-      content: translatedDetails && translatedDetails.services ? translatedDetails.services : userDetailsG.services,
-      key: translatedDetails ? translatedDetails.servicesKey || 'services' : 'services'
-    },
-    {
-      title: `${translatedDetails ? `🎓 ${translatedDetails.Education}` : "🎓 Education"}`,
-      content: translatedDetails && translatedDetails.education ? translatedDetails.education : userDetailsG.education,
-      key: translatedDetails ? translatedDetails.educationKey || 'education' : 'education'
-    },
-    {
-      title: `${translatedDetails ? `⭐ ${translatedDetails.Experience}` : "⭐ Experience"}`,
-      content: translatedDetails && translatedDetails.experience ? translatedDetails.experience : userDetailsG.experience,
-      key: translatedDetails ? translatedDetails.experienceKey || 'experience' : 'experience'
-    },
-    {
-      title: `${translatedDetails ? `💡 ${translatedDetails.Skills}` : "💡 Skills"}`,
-      content: translatedDetails && translatedDetails.skills ? translatedDetails.skills : userDetailsG.skills,
-      key: translatedDetails ? translatedDetails.skillsKey || 'skills' : 'skills'
-    },
-    {
-      title: `${translatedDetails ? `🌍 ${translatedDetails.Languages}` : "🌍 Languages"}`,
-      content: translatedDetails && translatedDetails.languages ? translatedDetails.languages : userDetailsG.languages,
-      key: translatedDetails ? translatedDetails.languagesKey || 'languages' : 'languages'
-    }
-  ];
+  {
+    title: labels?.summary || "🔷 Summary",
+    content: userDetailsG.bio,
+    key: "bio"
+  },
+  {
+    title: labels?.services || "💼 Services",
+    content: userDetailsG.services,
+    key: "services"
+  },
+  {
+    title: labels?.education || "🎓 Education",
+    content: userDetailsG.education,
+    key: "education"
+  },
+  {
+    title: labels?.experience || "⭐ Experience",
+    content: userDetailsG.experience,
+    key: "experience"
+  },
+  {
+    title: labels?.skills || "💡 Skills",
+    content: userDetailsG.skills,
+    key: "skills"
+  },
+  {
+    title: labels?.languages || "🌍 Languages",
+    content: userDetailsG.languages,
+    key: "languages"
+  }
+];
+
+
   
   return (
-    <div
-      className={`  text-sm md:text-base flex items-start justify-center   pt-4 min-h-screen pb-20 ${userDetailsG.bgcolorp}`}
-    >
+    <div dir={language === "ar" ? "rtl" : "ltr"} className={`flex items-start justify-center  text-xs sm:text-base md:text-base  pt-4  pb-20 relative ${userDetailsG.bgcolorp}`}>
+      <ParticleComponent  bgcolor={userDetailsG.bgcolorp} /> 
       <div className="w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg">
         {/* Image Profile and info user */}
         <div className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} border flex flex-col md:flex-row sm:flex-row sm:items-start  md:items-start items- gap-2 sm:gap-5 md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
@@ -292,41 +223,40 @@ function Page({ params }) {
             </AlertDialog>
           </div>
           {/* Content */}
-          <div className="space-y-2 sm:text-left md:text-left">
-             <h2 className={` ${language === "ar" && "text-right"} font-bold text-2xl text-gray-800`}>
+          <div className="space-y-2 text-cente sm:text-left md:text-left">
+             <h2 className="font-bold text-2xl text-gray-800">
                {userDetailsG.fullname}
              </h2>
              {/* Email */}
-             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2 ">
+             <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2">
                <span className="text-green-500">
                  <MailCheck width={18} />
                </span>{" "}
                {userDetailsG.email}
              </p>
              {/* Username and Country */}
-             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start  gap-2 ">
+             <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start gap-2">
                <span className="text-green-900">@ {userDetailsG.username}</span>
                {userDetailsG.country && (
                  <span className="flex items-center gap-1 justify-cente">
                    <MapPin width={18} style={{ color: "red" }} />
-                  {`${translatedDetails ? translatedDetails.country : userDetailsG.country}`} 
+                   {userDetailsG.country}
                  </span>
                )}
              </p>
               {/* Phone Number and BLinks */}
-             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start">
+             <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start ">
               {userDetailsG.phoneNumber && (
-               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2">
+               <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2 ">
                  <Phone width={18} />
                  {userDetailsG.phoneNumber}
                </p>
              )}
             {/* Business Links */}
             <div className={`${language === "ar" && "text-right"} `}>
-              <UserLinks language={language} setLanguage={setLanguage} emailuser={emailuser} />
+              <UserLinks userLinks={userLinks} language={language} labels={labels} />
             </div>
              </div>
-             
             {/* Social Media */}
             <div>
             <SocialMedia userDetailsG={userDetailsG} />
@@ -372,23 +302,30 @@ function Page({ params }) {
           <div className="absolute sm:top-[116px] md:top-[113px] top-[110px] md:-right-1 w-full duration-300">
             <select
               className="bg-white border cursor-pointer border-gray-300 rounded-md mb-6 w-full"
-              onChange={(e) => router.push(`/${params.username}/${e.target.value}`)}
+              onChange={(e) =>{
+                router.push(`/${params.username}/${e.target.value}`)
+              }}
             >
-              <option></option>
               {languagess.map((lang) => (
-                <option className="text-center" key={lang.value} value={lang.value}>
+                <option 
+                  className="text-center" 
+                  key={lang.value} 
+                  value={lang.value}
+                  selected={lang.value === language}
+                >
                   {lang.label}
                 </option>
               ))}
             </select>
           </div>
+
         </nav>
         {/* Category */}
         <p className="text-base font-semibold text-center text-gray-800 bg-gray-100 p-2 my-2 rounded border border-gray-300">
-        {`${translatedDetails ? translatedDetails.category : userDetailsG.category}`}
+        {`${userDetailsG.category}`}
         </p>
         {/* Modul */}
-        <div className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} flex flex-wrap gap-2 mb-2 justify-center`}>
+        <div className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} flex flex-wrap justify-center  gap-2 mb-2`}>
           {datamodul.map((dt, i) => {
             return (
               <div key={i}>
@@ -396,21 +333,20 @@ function Page({ params }) {
                   <AlertDialogTrigger
                     className={`p-2 ${
                       !dt.data && "hidden"
-                    } bg-slate-100 md:text-[2.7vh] sm:text-[2.6vh]  hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
+                    } bg-slate-100  hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
                   >
                     {
-                      <div className="flex gap-1">
-                        <div>{dt.name.split(" ")[0]}</div>
-                        <div>{dt.name.split(" ")[1]}</div>
+                      <div  className="flex gap-[2px]">
+                        {dt.name}
                       </div>
                     }
                   </AlertDialogTrigger>
                   <AlertDialogContent>
-                    <AlertDialogHeader>
+                    <AlertDialogHeader dir={`${language === "ar" && "rtl"}`}>
                       <AlertDialogTitle className={` bg-gray-200  p-2 border rounded-md`}>
-                        <div className={`${language === "ar" && "text-right pr-1 "} `}>{dt.namedata}</div>
+                        <div className={`${language === "ar" && "text-start"}`}>{dt.name}</div>
                       </AlertDialogTitle>
-                      <AlertDialogDescription dir={language === "ar" ? "rtl" : "ltr"} className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
+                      <AlertDialogDescription  className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
                         {dt.data}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -431,11 +367,13 @@ function Page({ params }) {
         {CV.map(({ title, content, key }) =>
             content && (
               <div key={key} className="border p-4 text-right!? bg-white rounded-lg shadow-md mb-4 hover:scale-100 duration-500">
-                <h3 className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} text-xl font-semibold text-indigo-600 mb-2`}>{title}</h3>
-                <p  dir={language === "ar" ? "rtl" : "ltr"}
-                    className={`${language === "ar" && "text-right"} text-gray-800 whitespace-pre-wrap leading-relaxed`}>
-                    {content}
-                  </p>
+                <h3 className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} 
+                 text-xl font-semibold text-indigo-600 mb-2`}>
+                  {title}
+                </h3>
+                <p className="text-gray-800 text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
+                  {content}
+                </p>
               </div>
             )
           )}
