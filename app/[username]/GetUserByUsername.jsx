@@ -66,7 +66,7 @@ function GetUserByUsername({ params }) {
     };
 
     fetchUsers();
-  }, [SERVER_URL_V]);
+  }, [SERVER_URL_V,params.username]);
 
   const CopyLinkProfil = () => {
     const urlToCopy = `${CLIENT_URL}${path}`;

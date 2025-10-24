@@ -33,6 +33,7 @@ import SocialMedia from "../SocialMedia"
 import Loadingpage from "../../Components/Loading/LoadingPage";
 import LoadingPagetranslate from "../../Components/Loading/LoadingPagetranslate";
 import ParticleComponent from "../../Components/ParticleComponent";
+import AccountNotFound from "../../Components/AccountNotFound";
 
 function Page({ params }) {
  const { data, status } = useSession();

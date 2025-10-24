@@ -26,17 +26,6 @@ export const MyProvider = ({ children }) => {
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
    const [selectedUser, setSelectedUser] = useState(null);
-   useEffect(() => {
-    const findme = userDetails.find((user) => user.email === EmailUser);
-    const storedUser = localStorage.getItem("SelectedUser");
-     if (storedUser) {
-       setSelectedUser(JSON.parse(storedUser));
-     }
-     else if (findme) {
-       setSelectedUser(findme);
-     }
-   }, [EmailUser]);
-
   // socket.io
   useEffect(() => {
     const socket = io(SERVER_URL);
@@ -101,6 +90,14 @@ export const MyProvider = ({ children }) => {
           }
         });
         setUserDetails(res.data);
+        const findme = userDetails.find((user) => user.email === EmailUser);
+        const storedUser = localStorage.getItem("SelectedUser");
+         if (storedUser) {
+           setSelectedUser(JSON.parse(storedUser));
+         }
+         else if (findme) {
+           setSelectedUser(findme);
+         }
       } catch (error) {
         console.error("Error fetching user details:", error);
       } finally {
@@ -109,7 +106,7 @@ export const MyProvider = ({ children }) => {
     };
 
     fetchUsers();
-  }, [SERVER_URL_V]);
+  }, [SERVER_URL_V,EmailUser]);
 
   // Get messages
   useEffect(() => {
