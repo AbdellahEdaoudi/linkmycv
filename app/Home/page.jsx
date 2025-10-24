@@ -1,5 +1,5 @@
 "use client"
-import { useContext, useEffect } from "react";
+import { use, useContext, useEffect } from "react";
 import ChatHome from "../Components/ChatHome";
 import { MyContext } from "../Context/MyContext";
 import CreateProfile from "../Components/CreateProfile";
@@ -8,7 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default  function Home() {
-  const { userDetails, EmailUser,loadingMessages,loadingUsers } = useContext(MyContext);
+  const { userDetails, EmailUser,loadingMessages,loadingUsers,messages } = useContext(MyContext);
   const { data, status } = useSession();
   const Router = useRouter();
   useEffect(() => {
@@ -17,7 +17,8 @@ export default  function Home() {
     }
   }, [status, Router]);
   
-  if (loadingMessages || loadingUsers || userDetails.length === 0) {
+  if (loadingMessages || loadingUsers || userDetails.length === 0 
+    || !userDetails || !messages || messages.length === 0) {
     return <LoadChatPage />;
   }
   const filt = userDetails.find((fl) => fl.email === EmailUser);

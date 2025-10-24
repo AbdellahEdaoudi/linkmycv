@@ -21,7 +21,7 @@ function LoadingPagetranslate({bgcolorp,language}) {
                    <div
                      width={140}
                      height={0}
-                     src={"/prifil Loading.png"}
+                     src={"/prifil_Loading.png"}
                      alt="Profile Image"
                      className="object-cover bg-gray-300 animate-pulse w-32 h-32  cursor-pointer"
                      />

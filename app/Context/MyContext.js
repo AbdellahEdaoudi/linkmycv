@@ -25,11 +25,17 @@ export const MyProvider = ({ children }) => {
    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
-   const [selectedUser, setSelectedUser] = useState(null);
+   const findme = userDetails.find((user) => user.email === EmailUser);
+   
   // socket.io
   useEffect(() => {
     const socket = io(SERVER_URL);
     setSocket(socket);
+    if (EmailUser) {
+      socket.emit('userConnected',EmailUser);
+    } else {
+      // console.error('User email is not available.');
+    }
 
     socket.on("receiveMessage", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -68,15 +74,7 @@ export const MyProvider = ({ children }) => {
     return () => {
       socket.disconnect();
     };
-  }, [SERVER_URL]);
-
-  useEffect(() => {
-    if (EmailUser) {
-      socket.emit('userConnected',EmailUser);
-    } else {
-      // console.error('User email is not available.');
-    }
-  }, [EmailUser, socket]);
+  }, [SERVER_URL,EmailUser]);
   
   // Get users
   useEffect(() => {
@@ -98,24 +96,11 @@ export const MyProvider = ({ children }) => {
 
     fetchUsers();
   }, [SERVER_URL_V]);
-   // Set selected user
-    useEffect(() => {
-    if (userDetails.length > 0 && EmailUser && loadingUsers === false){
-      const findme = userDetails.find((user) => user.email === EmailUser);
-      const storedUser = localStorage.getItem("SelectedUser");
-        if (storedUser) {
-          setSelectedUser();
-        }
-        else if (findme) {
-          setSelectedUser(JSON.parse(findme));
-      }
-    }
-   }, [EmailUser]);
 
   // Get messages
   useEffect(() => {
     const getMessages = async () => {
-      setLoadingMessages(true); // بدأ اللودينغ
+      setLoadingMessages(true);
       try {
         const response = await axios.get(`${SERVER_URL_V}/messages/${EmailUser}`, {
           headers: {
@@ -126,12 +111,12 @@ export const MyProvider = ({ children }) => {
       } catch (error) {
         console.error("Error fetching messages:", error);
       } finally {
-        setLoadingMessages(false); // انتهاء اللودينغ
+        setLoadingMessages(false);
       }
     };
 
     getMessages();
-  }, [EmailUser, SERVER_URL_V]);
+  }, [EmailUser,SERVER_URL_V]);
 
   // Get links
   useEffect(() => {
@@ -224,9 +209,9 @@ const Requests = friendRequests
         SERVER_URL_V,
         messages,
         setMessages,
-        socket,selectedUser, setSelectedUser,
+        socket,
         friendRequests, setFriendRequests,
-        Requests , loadingMessages,loadingUsers , loadingFriendRequests
+        Requests,loadingMessages,loadingUsers,loadingFriendRequests
       }}
     >
       <audio ref={audioRef} src="/notification3.mp3" preload="auto" />
