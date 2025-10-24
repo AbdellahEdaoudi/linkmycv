@@ -75,14 +75,14 @@ export const MyProvider = ({ children }) => {
     if (email) {
       socket.emit('userConnected',email);
     } else {
-      // console.error('User email is not available.');
+      console.error('User email is not available.');
     }
   }, [EmailUser, socket]);
   
   // Get users
   useEffect(() => {
     const fetchUsers = async () => {
-      setLoadingUsers(true); // بدأ اللودينغ
+      setLoadingUsers(true); 
       try {
         const res = await axios.get(`${SERVER_URL_V}/users`, {
           headers: {
@@ -90,14 +90,6 @@ export const MyProvider = ({ children }) => {
           }
         });
         setUserDetails(res.data);
-        const findme = userDetails.find((user) => user.email === EmailUser);
-        const storedUser = localStorage.getItem("SelectedUser");
-         if (storedUser) {
-           setSelectedUser(JSON.parse(storedUser));
-         }
-         else if (findme) {
-           setSelectedUser(findme);
-         }
       } catch (error) {
         console.error("Error fetching user details:", error);
       } finally {
@@ -106,7 +98,20 @@ export const MyProvider = ({ children }) => {
     };
 
     fetchUsers();
-  }, [SERVER_URL_V,EmailUser]);
+  }, [SERVER_URL_V]);
+   // Set selected user
+    useEffect(() => {
+    if (userDetails.length > 0 && EmailUser && loadingUsers === false){
+      const findme = userDetails.find((user) => user.email === EmailUser);
+      const storedUser = localStorage.getItem("SelectedUser");
+        if (storedUser) {
+          setSelectedUser(JSON.parse(storedUser));
+        }
+        else if (findme) {
+          setSelectedUser(findme);
+      }
+    }
+   }, [EmailUser]);
 
   // Get messages
   useEffect(() => {
