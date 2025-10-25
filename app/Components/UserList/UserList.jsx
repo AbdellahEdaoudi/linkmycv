@@ -9,7 +9,6 @@ function UserList({ selectedUser, setSelectedUser }) {
   const {userDetails,EmailUser,SERVER_URL_V,messages, setMessages}=useContext(MyContext);
   const [searchQuery,setSearchQuery] = useState("");
   const messagesEndRef = useRef(null);
-
   // Handle User Click
     const handleUserClick = async (User, lastMessage) => {
       try {
@@ -52,27 +51,21 @@ function UserList({ selectedUser, setSelectedUser }) {
         );
       }
     };
-    
-
-    const filteredSearchUser = userDetails
-    .filter(
-      (user) =>
-        user.fullname
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        user.username
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        user.email
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    )
+    // Safely highlight search text
     const safeHighlightText = (text) => {
       if (!searchQuery.trim()) return text;
       const regex = new RegExp(`(${searchQuery.trim()})`, "gi");
       const highlightedText = text.replace(regex, "<b>$1</b>");
       return DOMPurify.sanitize(highlightedText);
     };
+    // Filter users based on search query
+    const filteredSearchUser = userDetails.filter((user) => {
+      return (
+        user.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      )});
+    // Get users with last messages
     const filteredUserDetails = userDetails.filter(userDetail =>
       userDetail.email === EmailUser ||
       messages.some(msg =>
@@ -80,6 +73,7 @@ function UserList({ selectedUser, setSelectedUser }) {
         (msg.to === EmailUser && msg.from === userDetail.email)
       )
     );
+    // Map users to their last messages and sort
     const userWithLastMessages = filteredUserDetails.map(User => {
       const lastMessage = messages
         .filter(msg =>
@@ -96,13 +90,9 @@ function UserList({ selectedUser, setSelectedUser }) {
     <div>
       <div className="bg-gray-800 rounded-b-sm text-white  p-4">
         {/* Search Users input */}
-        <input
-          type="search"
-          placeholder="Search by Name or Email"
-          value={searchQuery}
+        <input type="search" placeholder="Search by Name or Email" value={searchQuery}
           onChange={(e)=>{setSearchQuery(e.target.value)}}
-          className="w-full px-4 py-2 mb-4 rounded-md bg-gray-700 text-white focus:outline-none"
-        />
+          className="w-full px-4 py-2 mb-4 rounded-md bg-gray-700 text-white focus:outline-none"/>
         {/* Search State */}
         <div className="text-lg  border-yellow-500 font-bold mb-4 sticky top-0 border-b py-1 bg-gray-800 z-10">
           {searchQuery === "" ? "Friends" : "Users List"}
@@ -159,74 +149,75 @@ function UserList({ selectedUser, setSelectedUser }) {
                     </div>
                   ))}
 
-   {userWithLastMessages.map(({ User, lastMessage }, i) => {
-      const messagesLength = Array.from(
-        new Map(
-          messages
-            .filter(fl =>
-              fl.to === EmailUser &&
-              fl.from === lastMessage?.from &&
-              fl.readorno === false
-            )
-            .map(item => [item.message, item])
-        ).values()
-      );
+                 {userWithLastMessages.map(({ User, lastMessage }, i) => {
+                    const unreadCount = Array.from(
+                      new Map(
+                        messages
+                          .filter(fl =>
+                            fl.to === EmailUser &&
+                            fl.from === lastMessage?.from &&
+                            fl.readorno === false
+                          )
+                          .map(item => [item.message, item])
+                      ).values()
+                    ).length;
 
-      return (
-        <div
-          key={i}
-          onClick={() => handleUserClick(User, lastMessage)}
-          className={`${
-            searchQuery === "" ? "" : "hidden"
-          } mt-1 flex relative items-center gap-4 p-2 duration-500 hover:bg-gray-700 cursor-pointer rounded-lg transition ${
-            selectedUser && selectedUser.email === User.email ? "bg-gray-700" : ""
-          }`}
-        >
-          <div className="relative flex-shrink-0 w-12 h-12">
-            <Image
-              src={User.urlimage}
-              alt="Profile"
-              className="rounded-full w-auto h-auto"
-              width={60} height={60}
-            />
-          </div>
-          <div className="flex flex-col">
-            <p className="text-lg">{User.fullname}</p>
-            <div className="flex items-center gap-1">
-              <p className="text-[14px] text-gray-400 line-clamp-1">
-                {lastMessage
-                  ? lastMessage.from === EmailUser
-                    ? `you: ${lastMessage.message}`
-                    : `${lastMessage.message}`
-                  : "No messages yet"}
-              </p>
-              <p className={`${User.email === EmailUser && 'hidden'} text-sm text-gray-500`}>
-                {messagesLength.length > 1
-                  ? `(${messagesLength.length})`
-                  : messagesLength.length === 1
-                    ? ""
-                    : ""}
-              </p>
-            </div>
-          </div>
-          {lastMessage && (
-            <p
-              className={` 
-                ${lastMessage.from === EmailUser && lastMessage.to === EmailUser && "hidden"}
-                ${lastMessage.from === EmailUser && "hidden"}
-                ${lastMessage.readorno && "hidden"} 
-                absolute right-3 top-1/2 -translate-y-1/2 bg-sky-800 rounded-full px-1 text-[10px]`}
-            >
-              new
-            </p>
-          )}
-        </div>
-      );
-    })}
-              </div>
-      </div>
-    </div>
-  );
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => handleUserClick(User, lastMessage)}
+                        className={`${searchQuery === "" ? "" : "hidden"}
+                         mt-1 flex relative items-center gap-4 p-2 duration-500 hover:bg-gray-700 cursor-pointer rounded-lg transition ${
+                          selectedUser && selectedUser.email === User.email ? "bg-gray-700" : ""
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0 w-12 h-12">
+                          <Image
+                            src={User.urlimage}
+                            alt="Profile"
+                            className="rounded-full w-auto h-auto"
+                            width={60} height={60}
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-lg">{User.fullname}</p>
+                          <div className="flex items-center gap-1">
+                             {/* p : lastMessage */}
+                            <p className="text-[14px] text-gray-400 line-clamp-1">
+                              {lastMessage
+                                ? lastMessage.from === EmailUser
+                                  ? `you: ${lastMessage.message}`
+                                  : `${lastMessage.message}`
+                                : "No messages yet"}
+                            </p>
+                              {/* p: Unread Count */}
+                            <p className={`${User.email === EmailUser && 'hidden'} text-sm text-gray-500`}>
+                              {unreadCount > 1
+                                ? `(${unreadCount})`
+                                : unreadCount === 1
+                                  ? ""
+                                  : ""}
+                            </p>
+                          </div>
+                        </div>
+                        {lastMessage && (
+                          <p
+                            className={` 
+                              ${lastMessage.from === EmailUser && lastMessage.to === EmailUser && "hidden"}
+                              ${lastMessage.from === EmailUser && "hidden"}
+                              ${lastMessage.readorno && "hidden"} 
+                              absolute right-3 top-1/2 -translate-y-1/2 bg-sky-800 rounded-full px-1 text-[10px]`}
+                          >
+                            new
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                            </div>
+                    </div>
+                  </div>
+                );
 }
 
 export default UserList;

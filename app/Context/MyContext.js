@@ -18,9 +18,7 @@ export const MyProvider = ({ children }) => {
    const EmailUser = data?.user?.email
    const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
    const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
-   const [loadingUsers, setLoadingUsers] = useState(false);
-   const [loadingMessages, setLoadingMessages] = useState(false);
-   const [loadingFriendRequests, setLoadingFriendRequests] = useState(false);
+   const [loadingAll, setLoadingAll] = useState(false);
    const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ;
    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
@@ -56,7 +54,6 @@ export const MyProvider = ({ children }) => {
     socket.on("receiveFriendRequest", (newRequest) => {
       setFriendRequests((prevRequests) => [...prevRequests, newRequest]);
     });
-
     socket.on("receiveUpdatedFriendRequest", (updatedRequest) => {
       setFriendRequests((prevRequests) =>
         prevRequests.map((request) =>
@@ -64,7 +61,6 @@ export const MyProvider = ({ children }) => {
         )
       );
     });
-
     socket.on("receiveDeletedFriendRequest", (deletedRequestId) => {
       setFriendRequests((prevRequests) =>
         prevRequests.filter((request) => request._id !== deletedRequestId)
@@ -76,87 +72,37 @@ export const MyProvider = ({ children }) => {
     };
   }, [SERVER_URL,EmailUser]);
   
-  // Get users
+  // Fetch all data
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoadingUsers(true); 
+    const fetchAllData = async () => {
       try {
-        const res = await axios.get(`${SERVER_URL_V}/users`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-          }
-        });
-        setUserDetails(res.data);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      } finally {
-        setLoadingUsers(false); // انتهاء اللودينغ
-      }
-    };
-
-    fetchUsers();
-  }, [SERVER_URL_V]);
-
-  // Get messages
-  useEffect(() => {
-    const getMessages = async () => {
-      setLoadingMessages(true);
-      try {
-        const response = await axios.get(`${SERVER_URL_V}/messages/${EmailUser}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-          }
-        });
-        setMessages(response.data);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      } finally {
-        setLoadingMessages(false);
-      }
-    };
-
-    getMessages();
-  }, [EmailUser,SERVER_URL_V]);
-
-  // Get links
-  useEffect(() => {
-    axios
-      .get(`${SERVER_URL_V}/links`,{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
-      })
-      .then((res) => {
-        setUserLinks(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user details:", error);
-      });
-  }, [SERVER_URL_V]);
-
-  // GetFriendRequest
-  useEffect(() => {
-    const GetFriendRequest = async () => {
-      try {
-        setLoadingFriendRequests(true);
-        const response = await axios.get(`${SERVER_URL_V}/friend/${EmailUser}`, {
+        setLoadingAll(true);
+      
+        const res = await axios.get(`${SERVER_URL_V}/alldata/${EmailUser}`, {
           headers: {
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
           },
         });
-        setFriendRequests(response.data.data);
+      
+        const data = res.data;
+      
+        if (data.success) {
+          setUserDetails(data.users || []);
+          setMessages(data.messages || []);
+          setFriendRequests(data.friends || []);
+          setUserLinks(data.links || []);
+        } else {
+          console.error("Failed to fetch data:", data.message);
+        }
       } catch (error) {
-        console.error(
-          "Error fetching friend requests",
-          error.response ? error.response.data : error.message
-        );
+        console.error("Error fetching all data:", error);
       } finally {
-        setLoadingFriendRequests(false); // إنهاء اللودينغ
+        setLoadingAll(false);
       }
     };
-
-    GetFriendRequest();
-  }, [SERVER_URL_V,EmailUser]);
+  
+    if (EmailUser) fetchAllData();
+  }, [SERVER_URL_V, EmailUser]);
 
 
   const latestNotifications = messages
@@ -211,7 +157,7 @@ const Requests = friendRequests
         setMessages,
         socket,
         friendRequests, setFriendRequests,
-        Requests,loadingMessages,loadingUsers,loadingFriendRequests
+        Requests,loadingAll
       }}
     >
       <audio ref={audioRef} src="/notification3.mp3" preload="auto" />

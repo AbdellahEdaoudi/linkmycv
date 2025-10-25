@@ -36,7 +36,7 @@ function Navbar() {
   const [FR_FRREQ, setFR_FRREQ] = useState("Friend Requests");
   const navRef = useRef(null);
   const {userDetails,Notification,EmailUser,Requests,
-    messages,setMessages,SERVER_URL_V,loadingUsers} = useContext(MyContext);
+    messages,setMessages,SERVER_URL_V,loadingAll} = useContext(MyContext);
   const [search, setSearch] = useState(""); 
   useEffect(() => {
     const User = userDetails.find((user) => user.email === EmailUser);
@@ -87,29 +87,25 @@ function Navbar() {
         return null; // Handle the default case
     }
   };
-  const shuffleArray = (array) => {
-  return array.sort(() => Math.random() - 0.5);
-};
-
 const filteredUserDetails = userDetails
   .filter(
     (user) =>
-      user.fullname.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase()) ||
-      user.category.toLowerCase().includes(search.toLowerCase()) ||
-      user.username.toLowerCase().includes(search.toLowerCase())
+      user?.fullname?.toLowerCase().includes(search.toLowerCase()) ||
+      user?.email?.toLowerCase().includes(search.toLowerCase()) ||
+      user?.category?.toLowerCase().includes(search.toLowerCase()) ||
+      user?.username?.toLowerCase().includes(search.toLowerCase())
   )
-  .slice(); // نسخة جديدة
-
-const shuffledUserDetails = shuffleArray(filteredUserDetails);
-
-
+  .slice();
+  // Shuffle the filtered results
+  const shuffleArray = (array) => {return array.sort(() => Math.random() - 0.5)};
+  const shuffledUserDetails = shuffleArray(filteredUserDetails);
   const safeHighlightText = (text) => {
     if (!search.trim()) return text;
     const regex = new RegExp(`(${search.trim()})`, "gi");
     const highlightedText = text.replace(regex, "<b>$1</b>");
     return DOMPurify.sanitize(highlightedText);
   };
+  // Click Outside to close menus
   useEffect(() => {
     const ClickOutside = (event) => {
       if (!navRef.current?.contains(event.target)) {
@@ -127,42 +123,24 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
       <nav className=" border-b drop-shadow-2xl bg-gray-200  backdrop-blur-lg ">
         <section className="md:container md:mx-auto ml-3 mr-6 py-3">
           <div className="flex justify-between items-center text-white">
+            {/* LOGO */}
             <div
-              onClick={() => {
-                router.push("/Home");
-                setSetting(true);
-                setFrReq(true);
-                setNotification(true);
-              }}
-              className="flex items-center flex-shrink-0 md:w-auto  hover:scale-105 duration-300 cursor-pointer"
-            >
+              onClick={() => { router.push("/Home"); setSetting(true); setFrReq(true); setNotification(true)}}
+              className="flex items-center flex-shrink-0 md:w-auto  hover:scale-105 duration-300 cursor-pointer">
               <Image src="/favicon.png" alt="Logo" width={45} height={45} />
-              <Image
-                src="/Logo.png"
-                alt="Logo"
-                width={160}
-                height={70}
-                className="md:block sm:block hidden w-auto h-auto"
-              />
+              <Image src="/Logo.png" alt="Logo" width={160} height={70} className="md:block sm:block hidden w-auto h-auto"/>
             </div>
             {/* SEARCHE */}
             <div className={`md:mx-0 mx-2 ${status === "unauthenticated" && "hidden"}`}>
               <div className="flex items-center bg-gray-100 border shadow-sm border-gray-300 rounded-lg   md:w-96 max-w-md">
-                <div className=" p-2 text-gray-500 ">
-                  <UserRoundSearch />
-                </div>
-                <input
-                  type="search"
-                  placeholder="Search"
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                  }}
-                  className="bg-gray-100 text-black  p-2  rounded-lg focus:outline-none  focus:ring-blue-500 transition duration-300 w-full"
-                />
+                <div className=" p-2 text-gray-500 "><UserRoundSearch /></div>
+                <input type="search" placeholder="Search" onChange={(e) => {setSearch(e.target.value)}}
+                  className="bg-gray-100 text-black  p-2  rounded-lg focus:outline-none  focus:ring-blue-500 transition duration-300 w-full"/>
               </div>
             </div>
-
-            {(status === "authenticated" && !loadingUsers) &&
+             {/* USER PROFILE AND ICONS */}
+            <div>
+              {(status === "authenticated" && !loadingAll) &&
               filt.map((userr, i) => (
                 <div key={i} className="flex items-center gap-1">
                   <div
@@ -255,8 +233,8 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
                   </div>
                 </div>
               ))}
-            {status === "unauthenticated" && <SignInWithGoogle />}
-            {(status === "loading" || loadingUsers || userDetails.length === 0) && (
+              {status === "unauthenticated" && <SignInWithGoogle />}
+              {(status === "loading" || loadingAll) && (
               <div className={`${status === "unauthenticated" && "hidden"} flex md:flex-row flex-row-reverse items-center gap-2`}>
                 <div className="w-11 h-11 bg-gray-300 rounded-full"></div>
                 <div>
@@ -264,7 +242,8 @@ const shuffledUserDetails = shuffleArray(filteredUserDetails);
                   <div className="md:w-32 w-12 h-4 bg-gray-300 rounded-md"></div>
                 </div>
               </div>
-            )}
+               )}
+            </div>
           </div>
         </section>
       </nav>

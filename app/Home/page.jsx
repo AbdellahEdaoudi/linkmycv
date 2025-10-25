@@ -1,33 +1,47 @@
 "use client"
-import { use, useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatHome from "../Components/ChatHome";
-import { MyContext } from "../Context/MyContext";
 import CreateProfile from "../Components/CreateProfile";
 import LoadChatPage from "../Components/Loading/LoadChatPage";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { MyContext } from "../Context/MyContext";
 
-export default  function Home() {
-  const { userDetails, EmailUser,loadingMessages,loadingUsers,messages } = useContext(MyContext);
-  const { data, status } = useSession();
+export default function Home() {
+  const { EmailUser, loadingAll, SERVER_URL_V } = useContext(MyContext);
+  const { status } = useSession();
   const Router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
   useEffect(() => {
     if (status === "unauthenticated") {
-        signIn("google", {redirect:true, callbackUrl:`/Home`})
+      signIn("google", { redirect: true, callbackUrl: `/Home` });
     }
   }, [status, Router]);
-  
-  if (loadingMessages || loadingUsers || userDetails.length === 0 
-    || !userDetails || !messages || messages.length === 0) {
-    return <LoadChatPage />;
-  }
-  const filt = userDetails.find((fl) => fl.email === EmailUser);
-  if (!filt) {
-    return <CreateProfile />;
-  }
-  return (
-    <div>
-      <ChatHome />
-    </div>
-  );
+  // Fetch user data based on EmailUser
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!EmailUser) return;
+      setLoadingUser(true);
+      try {
+        const res = await axios.get(`${SERVER_URL_V}/usersE/${EmailUser}`, {
+          headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` }
+        });
+        setUser(res.data);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [EmailUser, SERVER_URL_V]);
+
+  if (loadingAll || loadingUser || !EmailUser) return <LoadChatPage />;
+
+  if (!loadingAll && !user && status === "authenticated") return <CreateProfile />;
+
+  return <ChatHome />;
 }
