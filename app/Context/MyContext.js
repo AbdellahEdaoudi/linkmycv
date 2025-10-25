@@ -2,9 +2,7 @@
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { createContext, useEffect, useRef, useState } from 'react';
-import { apiRequest } from '../Admin/Components/apiRequest'
 import io from 'socket.io-client';
-import { useRouter } from 'next/navigation';
 
 export const MyContext = createContext();
 
@@ -23,7 +21,6 @@ export const MyProvider = ({ children }) => {
    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
    const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
    const audioRef = useRef(null);
-   const findme = userDetails.find((user) => user.email === EmailUser);
    
   // socket.io
   useEffect(() => {

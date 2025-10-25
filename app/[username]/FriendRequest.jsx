@@ -17,9 +17,7 @@ import io from "socket.io-client";
 
 function FriendRequest({ emailuser, path, userDetailsG }) {
   const { SERVER_URL_V, SERVER_URL, userDetails, EmailUser,
-    loadingFriendRequests
-  } =
-    useContext(MyContext);
+     loadingAll } = useContext(MyContext);
   const router = useRouter();
   const [friendRequests, setFriendRequests] = useState([]);
   const [Loading, setLoading] = useState(false);
@@ -179,7 +177,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
     }
   };
 
-  if (loadingFriendRequests || !friendRequests) {
+  if (loadingAll || !EmailUser) {
     return <div className="p-1 border rounded-full flex items-center animate-spin justify-center">
       {/* <Loader /> */}
       <LoaderPinwheel />
@@ -195,7 +193,9 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   return (
     <div>
       {/* FriendRequest */}
-      {!CheckFrirnd && EmailUser !== emailuser ? (
+      {!loadingAll && friendRequests && (
+        <div>
+          {  !CheckFrirnd && EmailUser !== emailuser ? (
         <button
           title="Add friend"
           onClick={SendFriendRequest}
@@ -203,9 +203,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
         >
           {Loading ? <i className="fa fa-spinner fa-spin "></i> : <UserPlus />}
         </button>
-      ) : CheckFrirnd &&
-        CheckFrirnd.status === "pending" &&
-        CheckFrirnd.to === EmailUser ? (
+      ) : CheckFrirnd && CheckFrirnd.status === "pending" && CheckFrirnd.to === EmailUser ? (
         <div className="">
           <button
             onClick={() => document.getElementById("my_modal_3").showModal()}
@@ -260,9 +258,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
             </div>
           </dialog>
         </div>
-      ) : CheckFrirnd &&
-        CheckFrirnd.status === "pending" &&
-        CheckFrirnd.from === EmailUser ? (
+      ) : CheckFrirnd && CheckFrirnd.status === "pending" && CheckFrirnd.from === EmailUser ? (
         <button
           title="Cancel request"
           onClick={DeleteRequest}
@@ -293,6 +289,8 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
           <MessageCircleMore />
         </button>
       ) : null}
+        </div>
+      )}
     </div>
   );
 }
