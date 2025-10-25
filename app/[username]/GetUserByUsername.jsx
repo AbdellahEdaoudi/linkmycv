@@ -84,7 +84,7 @@ function GetUserByUsername({ params }) {
     return <Loadingpage />
   }
   
-  if (!userDetailsG && !loadingUsers) {
+  if ((!userDetailsG || !userDetailsG._id) && !loadingUsers) {
   return (
     <div>
       <AccountNotFound />
