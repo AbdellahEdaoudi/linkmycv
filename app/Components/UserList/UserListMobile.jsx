@@ -120,7 +120,10 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
             return (
               <div
                 key={i}
-                onClick={() => handleUserClick(user, lastMessage)}
+                onClick={() => {
+                  handleUserClick(user, lastMessage);
+                  router.push(`/${user.username}`);
+                }}
                 className={`flex items-center gap-4 p-2 mb-1 rounded-lg hover:bg-gray-700 cursor-pointer ${
                   selectedUser?.email === user.email ? "bg-gray-700" : ""
                 } relative`}
