@@ -56,8 +56,8 @@ function Navbar() {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
         }
       });
-      const from = response.data.result[0].from
-      const to = response.data.result[0].to
+      const from = fromEmail
+      const to = toEmail
       setMessages(prevMessages =>
         prevMessages.map(message =>
           message.from === from && message.to === to && message.readorno === false
