@@ -14,7 +14,7 @@ function UserList({ selectedUser, setSelectedUser }) {
       try {
         setSelectedUser(User);
         localStorage.setItem("SelectedUser", JSON.stringify(User));
-        if (lastMessage?.from && lastMessage?.to) {
+        if (lastMessage?.from && lastMessage?.to && lastMessage.readorno === false && lastMessage.to === EmailUser) {
           await axios.put(
             `${SERVER_URL_V}/messages/readorno`,
             {

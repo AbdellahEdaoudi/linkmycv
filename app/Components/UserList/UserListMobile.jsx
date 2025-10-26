@@ -20,7 +20,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
       setSelectedUser(user);
       localStorage.setItem("SelectedUser", JSON.stringify(user));
 
-      if (lastMessage?.from && lastMessage?.to) {
+      if (lastMessage?.from && lastMessage?.to && lastMessage.readorno === false && lastMessage.to === EmailUser) {
         await axios.put(
           `${SERVER_URL_V}/messages/readorno`,
           {
