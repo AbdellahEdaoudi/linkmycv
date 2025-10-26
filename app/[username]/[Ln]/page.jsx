@@ -124,10 +124,6 @@ function Page({ params }) {
     data: userDetailsG.languages
   }
 ];
-
-  
-  
-  
   const ListDisk = ( data ) => {
     return (
       <ul className={`list-disc  ml-4 ${language === "ar" ? 'list-disc-rtl mr-4' : 'list-disc-ltr ml-4 '}`}>
@@ -336,19 +332,19 @@ function Page({ params }) {
                       !dt.data && "hidden"
                     } bg-slate-100  hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
                   >
-                    {
-                      <div  className="flex gap-[2px]">
-                        {dt.name}
-                      </div>
-                    }
+                    {language === "ar" ? dt.name.split(' ')[0] + ' ' + dt.name.split(' ')[1] : 
+                   dt.name.split(' ')[1] + ' ' + dt.name.split(' ')[0]}
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader dir={`${language === "ar" && "rtl"}`}>
                       <AlertDialogTitle className={` bg-gray-200  p-2 border rounded-md`}>
-                        <div className={`${language === "ar" && "text-start"}`}>{dt.name}</div>
+                        <div className={`${language === "ar" && "text-start"}`}>
+                          {language === "ar" ? dt.name.split(' ')[0] + ' ' + dt.name.split(' ')[1] : 
+                           dt.name.split(' ')[1] + ' ' + dt.name.split(' ')[0]}
+                          </div>
                       </AlertDialogTitle>
-                      <AlertDialogDescription  className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
-                        {dt.data}
+                      <AlertDialogDescription  className=" overflow-y-auto max-h-96 break-words bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
+                        <div className="break-words">{dt.data}</div>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -368,11 +364,11 @@ function Page({ params }) {
         {CV.map(({ title, content, key }) =>
             content && (
               <div key={key} className="border p-4 text-right!? bg-white rounded-lg shadow-md mb-4 hover:scale-100 duration-500">
-                <h3 className={`${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} 
-                 text-xl font-semibold text-indigo-600 mb-2`}>
-                  {title}
+                <h3  className={`text-xl font-semibold text-indigo-600 mb-2`}>
+                  {language === "ar" ? title.split(' ')[0] + ' ' + title.split(' ')[1] : 
+                   title.split(' ')[1] + ' ' + title.split(' ')[0]}
                 </h3>
-                <p className="text-gray-800 text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-800  break-words text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
                   {content}
                 </p>
               </div>

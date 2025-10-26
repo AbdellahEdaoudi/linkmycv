@@ -340,7 +340,7 @@ function GetUserByUsername({ params }) {
                       <AlertDialogTitle className={` bg-gray-200  p-2 border rounded-md`}>
                         <div className="text-start">{dt.name}</div>
                       </AlertDialogTitle>
-                      <AlertDialogDescription className="overflow-y-auto max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
+                      <AlertDialogDescription className="overflow-y-auto  max-h-96 bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
                         {dt.data}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -365,7 +365,7 @@ function GetUserByUsername({ params }) {
                  text-xl font-semibold text-indigo-600 mb-2`}>
                   {title}
                 </h3>
-                <p className="text-gray-800 text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-800 break-words text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
                   {content}
                 </p>
               </div>
