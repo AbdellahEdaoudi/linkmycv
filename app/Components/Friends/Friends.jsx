@@ -7,9 +7,10 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { UserX } from "lucide-react";
+import { set } from "lodash";
 
 function Friends() {
-  const { SERVER_URL_V, EmailUser, userDetails,
+  const { SERVER_URL_V, EmailUser, userDetails,setFriendRequests,
     friendRequests,socket,loadingFriendRequests} =
     useContext(MyContext);
   const [loadingStatus, setLoadingStatus] = useState({});
@@ -30,13 +31,18 @@ function Friends() {
 
     setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: true } }));
     try {
-      await axios.delete(`${SERVER_URL_V}/friend/${requestId}`, {
+      const res = await axios.delete(`${SERVER_URL_V}/friends/${requestId}`, {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
         },
       });
+      const requestTo = res.data.requestTo;
+      const requestFrom = res.data.requestFrom;
+      setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
       toast("Unfriend successfully");
-      socket.emit("deleteFriendRequest", requestId);
+      socket.emit('deleteFriendRequest', { to: 
+        requestFrom === EmailUser ? requestTo : requestFrom
+        , id: requestId });
     } catch (error) {
       console.error("Error deleting request:", error.message);
       toast.error("Failed to delete request");

@@ -26,6 +26,7 @@ export const MyProvider = ({ children }) => {
   useEffect(() => {
     const socket = io(SERVER_URL);
     setSocket(socket);
+    
     if (EmailUser) {
       socket.emit('userConnected',EmailUser);
     } else {

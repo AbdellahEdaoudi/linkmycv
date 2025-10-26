@@ -14,19 +14,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import io from "socket.io-client";
+import { set } from "lodash";
 
 function FriendRequest({ emailuser, path, userDetailsG }) {
   const { SERVER_URL_V, SERVER_URL, userDetails, EmailUser,
-     loadingAll } = useContext(MyContext);
+     loadingAll,friendRequests, setFriendRequests } = useContext(MyContext);
   const router = useRouter();
-  const [friendRequests, setFriendRequests] = useState([]);
   const [Loading, setLoading] = useState(false);
   const [LoadingD, setLoadingD] = useState(false);
   const [from, setfrom] = useState("");
   const [To, setTo] = useState("");
   const [friendId, setfriendId] = useState("");
   const [socket, setSocket] = useState(null);
-
+  // Set from and to emails
   useEffect(() => {
     if (userDetails && Array.isArray(userDetails)) {
       const userD = userDetails.find((user) => user.email === EmailUser);
@@ -44,7 +44,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       }
     }
   }, [userDetails, EmailUser, userDetailsG]);
- 
+ // Set friendId
   useEffect(() => {
     if (friendRequests && Array.isArray(friendRequests)) {
       const userF = friendRequests.find(
@@ -55,7 +55,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       if (userF) {
         setfriendId(userF._id);
       } else {
-        console.log("User not found in friendRequests");
+        // console.log("User not found in friendRequests");
       }
     }
   }, [friendRequests, EmailUser, emailuser]);
@@ -88,33 +88,11 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       socket.off("receiveDeletedFriendRequest");
     };
   }, [SERVER_URL]);
-  
-  // GetFriendRequest
-  useEffect(() => {
-    const GetFriendRequest = async () => {
-      try {
-        const response = await axios.get(`${SERVER_URL_V}/friends/email/${EmailUser}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
-          }
-        });
-        setFriendRequests(response.data.data);
-      } catch (error) {
-        console.error(
-          "Error fetching friend requests",
-          error.response ? error.response.data : error.message
-        );
-      }
-    };
-    GetFriendRequest();
-  }, [SERVER_URL_V,EmailUser]);
 
   // SendFriendRequest
   const SendFriendRequest = async () => {
     setLoading(true);
-    const data = { from, to: To, status: "pending" };
-    console.log(data);
-
+    const data = { from, to: To};
     try {
       const response = await axios.post(`${SERVER_URL_V}/friends`, data, {
         headers: {
@@ -137,16 +115,16 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   const UpdateFriendRequest = async () => {
     setLoading(true);
     try {
-      const data = { from, to: To, status: "accept" };
-      console.log(data);
       const response = await axios.put(
-        `${SERVER_URL_V}/friends/${friendId}`,
-        data, {
+        `${SERVER_URL_V}/friends/${friendId}`,{},{
           headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
           }
         }
       );
+      setFriendRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request._id === friendId ? response.data.data : request))
       socket.emit("updateFriendRequest", response.data.data);
       setLoading(false);
     } catch (error) {
@@ -166,8 +144,9 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
         }
       });
+      setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== friendId));
       toast("Friend request canceled!");
-      socket.emit("deleteFriendRequest", friendId);
+      socket.emit("deleteFriendRequest", { to: To, id: friendId });
       setLoadingD(false);
     } catch (error) {
       console.error("Error deleting friend request", error);

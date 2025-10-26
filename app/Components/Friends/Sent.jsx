@@ -10,7 +10,7 @@ import { UserMinus } from 'lucide-react';
 
 function Sent() {
     const { SERVER_URL_V, EmailUser, userDetails,
-        friendRequests,socket,loadingFriendRequests} =
+        friendRequests,setFriendRequests,socket,loadingFriendRequests} =
         useContext(MyContext);
     const [loadingStatus, setLoadingStatus] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,13 +31,15 @@ function Sent() {
 
         setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: true } }));
         try {
-            await axios.delete(`${SERVER_URL_V}/friend/${requestId}`,{
+            const res = await axios.delete(`${SERVER_URL_V}/friends/${requestId}`,{
                 headers: {
                   'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
                 }
               });
+            const requestTo = res.data.requestTo;
+            setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
             toast('Request deleted successfully');
-            socket.emit('deleteFriendRequest', requestId);
+            socket.emit('deleteFriendRequest', { to: requestTo, id: requestId });
         } catch (error) {
             console.error('Error deleting request:', error.message);
             toast.error('Failed to delete request');
