@@ -106,7 +106,13 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       socket.emit("sendFriendRequest", newRequest);
       setLoading(false);
     } catch (error) {
-      console.error("Error creating friend request:", error);
+      if (error.response && error.response.status === 400) {
+        toast.error("Friend request already exists!");
+        window.location.reload(); 
+      } else {
+        toast.error("Failed to create friend request.");
+        console.error("Error creating friend request:", error);
+      }
     } finally {
       setLoading(false);
     }
