@@ -45,6 +45,12 @@ function GetUserByUsername({ params }) {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [language, setLanguage] = useState('');
   const filt = userDetails.find((fl) => fl.email === EmailUser);
+  const symbols = {summary: "🔷",services: "💼",education: "🎓",
+                    experience: "⭐",skills: "💡",languages: "🌍"
+                  };
+  const labels = {summary: "Summary",services: "Services",education: "Education",
+                  experience: "Experience",skills: "Skills",languages: "Languages",
+                   };
 
   // Get users
   useEffect(() => {
@@ -91,44 +97,7 @@ function GetUserByUsername({ params }) {
     </div>
       );
     }
-
-  const datamodul = [
-  {
-    name: "🔷 Summary",
-    namedata: "🔷 Summary",
-    data: userDetailsG.bio
-  },
-  {
-    name: "💼 Services",
-    namedata: "💼 Services",
-    data: userDetailsG.services
-  },
-  {
-    name: "🎓 Education",
-    namedata: "🎓 Education",
-    data: userDetailsG.education
-  },
-  {
-    name: "⭐ Experience",
-    namedata: "⭐ Experience",
-    data: userDetailsG.experience
-  },
-  {
-    name: "💡 Skills",
-    namedata: "💡 Skills",
-    data: userDetailsG.skills
-  },
-  {
-    name: "🌍 Languages",
-    namedata: "🌍 Languages",
-    data: userDetailsG.languages
-  }
-];
-
-  
-  
-  
-  const ListDisk = ( data ) => {
+    const ListDisk = ( data ) => {
     return (
       <ul className={`list-disc  ml-4 ${language === "ar" ? 'list-disc-rtl mr-4' : 'list-disc-ltr ml-4 '}`}>
         {data.split("\n").map((item, i) => (
@@ -140,39 +109,31 @@ function GetUserByUsername({ params }) {
     );
   };
   const emailuser = userDetailsG?.email;
-
+  // Modul Section
+  const datamodul = [
+    { key: "summary", data: userDetailsG.bio },
+    { key: "services", data: userDetailsG.services },
+    { key: "education", data: userDetailsG.education },
+    { key: "experience", data: userDetailsG.experience },
+    { key: "skills", data: userDetailsG.skills },
+    { key: "languages", data: userDetailsG.languages }
+  ].map(({ key, data }) => ({
+    name: `${symbols[key]} ${labels?.[key]}`,
+    data
+  }));
+  // CV Section
   const CV = [
-  {
-    title: "🔷 Summary",
-    content: userDetailsG.bio,
-    key: "bio"
-  },
-  {
-    title: "💼 Services",
-    content: userDetailsG.services,
-    key: "services"
-  },
-  {
-    title: "🎓 Education",
-    content: userDetailsG.education,
-    key: "education"
-  },
-  {
-    title: "⭐ Experience",
-    content: userDetailsG.experience,
-    key: "experience"
-  },
-  {
-    title: "💡 Skills",
-    content: userDetailsG.skills,
-    key: "skills"
-  },
-  {
-    title: "🌍 Languages",
-    content: userDetailsG.languages,
-    key: "languages"
-  }
- ];
+  { key: "summary", content: userDetailsG.bio },
+  { key: "services", content: userDetailsG.services },
+  { key: "education", content: userDetailsG.education },
+  { key: "experience", content: userDetailsG.experience },
+  { key: "skills", content: userDetailsG.skills },
+  { key: "languages", content: userDetailsG.languages }
+   ].map(({ key, content }) => ({
+     title:`${symbols[key]} ${labels?.[key]}`,
+     content,
+     key
+   }));
 
   
   return (
@@ -299,7 +260,7 @@ function GetUserByUsername({ params }) {
             <SignInComponents_CP userDetailsG={userDetailsG} />
           )}
           {/* translate */}
-          <div className="absolute sm:top-[116px] md:top-[113px] top-[110px] md:-right-1 w-full duration-300">
+          <div className="absolute sm:top-[116px] md:top-[120px] top-[110px] md:-right-1 w-full duration-300">
             <select
               className="bg-white border cursor-pointer border-gray-300 rounded-md mb-6 w-full"
               onChange={(e) => router.push(`/${params.username}/${e.target.value}`)}

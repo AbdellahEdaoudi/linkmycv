@@ -47,6 +47,9 @@ function Page({ params }) {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const filt = userDetails.find((fl) => fl.email === EmailUser);
   const language = params.Ln;
+  const symbols = {summary: "🔷",services: "💼",education: "🎓",
+                    experience: "⭐",skills: "💡",languages: "🌍"
+                  };
 
   // Get users
   useEffect(() => {
@@ -97,34 +100,7 @@ function Page({ params }) {
     </div>
       );
     }
-
-  const datamodul = [
-  {
-    name: labels?.summary,
-    data: userDetailsG.bio
-  },
-  {
-    name: labels?.services,
-    data: userDetailsG.services
-  },
-  {
-    name: labels?.education,
-    data: userDetailsG.education
-  },
-  {
-    name: labels?.experience,
-    data: userDetailsG.experience
-  },
-  {
-    name: labels?.skills,
-    data: userDetailsG.skills
-  },
-  {
-    name: labels?.languages,
-    data: userDetailsG.languages
-  }
-];
-  const ListDisk = ( data ) => {
+    const ListDisk = ( data ) => {
     return (
       <ul className={`list-disc  ml-4 ${language === "ar" ? 'list-disc-rtl mr-4' : 'list-disc-ltr ml-4 '}`}>
         {data.split("\n").map((item, i) => (
@@ -135,40 +111,33 @@ function Page({ params }) {
       </ul>
     );
   };
+  
   const emailuser = userDetailsG?.email;
 
+  const datamodul = [
+    { key: "summary", data: userDetailsG.bio },
+    { key: "services", data: userDetailsG.services },
+    { key: "education", data: userDetailsG.education },
+    { key: "experience", data: userDetailsG.experience },
+    { key: "skills", data: userDetailsG.skills },
+    { key: "languages", data: userDetailsG.languages }
+  ].map(({ key, data }) => ({
+    name: `${symbols[key]} ${labels?.[key]}`,
+    data
+  }));
   const CV = [
-  {
-    title: labels?.summary || "🔷 Summary",
-    content: userDetailsG.bio,
-    key: "bio"
-  },
-  {
-    title: labels?.services || "💼 Services",
-    content: userDetailsG.services,
-    key: "services"
-  },
-  {
-    title: labels?.education || "🎓 Education",
-    content: userDetailsG.education,
-    key: "education"
-  },
-  {
-    title: labels?.experience || "⭐ Experience",
-    content: userDetailsG.experience,
-    key: "experience"
-  },
-  {
-    title: labels?.skills || "💡 Skills",
-    content: userDetailsG.skills,
-    key: "skills"
-  },
-  {
-    title: labels?.languages || "🌍 Languages",
-    content: userDetailsG.languages,
-    key: "languages"
-  }
-];
+  { key: "summary", content: userDetailsG.bio },
+  { key: "services", content: userDetailsG.services },
+  { key: "education", content: userDetailsG.education },
+  { key: "experience", content: userDetailsG.experience },
+  { key: "skills", content: userDetailsG.skills },
+  { key: "languages", content: userDetailsG.languages }
+   ].map(({ key, content }) => ({
+     title:`${symbols[key]} ${labels?.[key]}`,
+     content,
+     key
+   }));
+
 
 
   
@@ -332,15 +301,13 @@ function Page({ params }) {
                       !dt.data && "hidden"
                     } bg-slate-100  hover:bg-slate-200 hover:scale-105 duration-300 rounded-lg border-2`}
                   >
-                    {language === "ar" ? dt.name.split(' ')[0] + ' ' + dt.name.split(' ')[1] : 
-                   dt.name.split(' ')[1] + ' ' + dt.name.split(' ')[0]}
+                    {dt.name}
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader dir={`${language === "ar" && "rtl"}`}>
                       <AlertDialogTitle className={` bg-gray-200  p-2 border rounded-md`}>
                         <div className={`${language === "ar" && "text-start"}`}>
-                          {language === "ar" ? dt.name.split(' ')[0] + ' ' + dt.name.split(' ')[1] : 
-                           dt.name.split(' ')[1] + ' ' + dt.name.split(' ')[0]}
+                          {dt.name}
                           </div>
                       </AlertDialogTitle>
                       <AlertDialogDescription  className=" overflow-y-auto max-h-96 break-words bg-sky-50  p-4 duration-300 rounded-sm border text-black whitespace-break-spaces text-start">
@@ -365,8 +332,7 @@ function Page({ params }) {
             content && (
               <div key={key} className="border p-4 text-right!? bg-white rounded-lg shadow-md mb-4 hover:scale-100 duration-500">
                 <h3  className={`text-xl font-semibold text-indigo-600 mb-2`}>
-                  {language === "ar" ? title.split(' ')[0] + ' ' + title.split(' ')[1] : 
-                   title.split(' ')[1] + ' ' + title.split(' ')[0]}
+                  {title}
                 </h3>
                 <p className="text-gray-800  break-words text-xs sm:text-base md:text-base  whitespace-pre-wrap leading-relaxed">
                   {content}
