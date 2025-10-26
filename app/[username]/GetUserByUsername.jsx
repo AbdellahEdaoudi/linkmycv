@@ -51,7 +51,7 @@ function GetUserByUsername({ params }) {
     const fetchUsers = async () => {
       setLoadingUsers(true); 
       try {
-        const res = await axios.get(`${SERVER_URL_V}/user/${params.username}`, {
+        const res = await axios.get(`${SERVER_URL_V}/users/username/${params.username}`, {
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
           }

@@ -22,7 +22,7 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
 
       if (lastMessage?.from && lastMessage?.to) {
         await axios.put(
-          `${SERVER_URL_V}/readorno`,
+          `${SERVER_URL_V}/messages/readorno`,
           {
             fromEmail: lastMessage.from,
             toEmail: lastMessage.to,

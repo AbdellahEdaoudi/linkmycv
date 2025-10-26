@@ -26,7 +26,7 @@ export default function Home() {
       if (!EmailUser) return;
       setLoadingUser(true);
       try {
-        const res = await axios.get(`${SERVER_URL_V}/usersE/${EmailUser}`, {
+        const res = await axios.get(`${SERVER_URL_V}/users/email/${EmailUser}`, {
           headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` }
         });
         setUser(res.data);

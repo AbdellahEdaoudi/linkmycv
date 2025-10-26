@@ -93,7 +93,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   useEffect(() => {
     const GetFriendRequest = async () => {
       try {
-        const response = await axios.get(`${SERVER_URL_V}/friend/${EmailUser}`, {
+        const response = await axios.get(`${SERVER_URL_V}/friends/email/${EmailUser}`, {
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
           }
@@ -116,7 +116,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
     console.log(data);
 
     try {
-      const response = await axios.post(`${SERVER_URL_V}/friend`, data, {
+      const response = await axios.post(`${SERVER_URL_V}/friends`, data, {
         headers: {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
         }
@@ -140,7 +140,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
       const data = { from, to: To, status: "accept" };
       console.log(data);
       const response = await axios.put(
-        `${SERVER_URL_V}/friend/${friendId}`,
+        `${SERVER_URL_V}/friends/${friendId}`,
         data, {
           headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
@@ -161,7 +161,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   const DeleteRequest = async () => {
     setLoadingD(true);
     try {
-      await axios.delete(`${SERVER_URL_V}/friend/${friendId}`, {
+      await axios.delete(`${SERVER_URL_V}/friends/${friendId}`, {
         headers: {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
         }

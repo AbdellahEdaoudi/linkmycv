@@ -48,7 +48,7 @@ function Navbar() {
   
   const ReadOrNo = async (fromEmail,toEmail) => {
     try {
-      const response = await axios.put(`${SERVER_URL_V}/readorno`, {
+      const response = await axios.put(`${SERVER_URL_V}/messages/readorno`, {
         fromEmail,
         toEmail,
       },{
