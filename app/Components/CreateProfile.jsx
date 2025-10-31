@@ -56,11 +56,7 @@ const CreateProfile = () => {
         aboni: false,
         blocked: false,
       };
-      const response = await axios.post(`${SERVER_URL_V}/users`, data,{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
-      });
+      const response = await axios.post("/api/proxy/users/create", data);
       console.log("Response:", response.data);
       setSuccessMessage("Your profile has been created!");
       window.location.reload();

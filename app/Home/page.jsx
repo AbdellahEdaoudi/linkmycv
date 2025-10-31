@@ -26,9 +26,7 @@ export default function Home() {
       if (!EmailUser) return;
       setLoadingUser(true);
       try {
-        const res = await axios.get(`${SERVER_URL_V}/users/email/${EmailUser}`, {
-          headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` }
-        });
+        const res = await axios.get(`/api/proxy/users/getUser`);
         setUser(res.data);
       } catch (error) {
         setUser(null);
@@ -37,7 +35,7 @@ export default function Home() {
       }
     };
     fetchUser();
-  }, [EmailUser, SERVER_URL_V]);
+  }, [EmailUser]);
 
   if (loadingAll || loadingUser || !EmailUser) return <LoadChatPage />;
 

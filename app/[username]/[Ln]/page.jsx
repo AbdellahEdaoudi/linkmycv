@@ -56,11 +56,7 @@ function Page({ params }) {
     const fetchUsers = async () => {
       setLoadingUsers(true); 
       try {
-        const res = await axios.get(`${SERVER_URL_V}/users/${params.username}/${params.Ln}`,{},{
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-          }
-        });
+        const res = await axios.get(`/api/proxy/users/${params.username}/${params.Ln}`);
         setuserDetailsG(res.data.user);
         setUserLinks(res.data.links);
         setlabels(res.data.labels);

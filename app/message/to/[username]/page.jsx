@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { CustomLinkify } from "../../../Components/CustomLinkify";
 import LMessages from "../../../Components/Loading/LMessages";
 import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
+import ConfirmModal from "../../../Components/ConfirmModal";
 
 function UserProfile({ params }) {
   const { toast } = useToast();
@@ -26,8 +27,8 @@ function UserProfile({ params }) {
   const [putdelete, setputdelete] = useState(true);
   const [idMsg, setIdMsg] = useState("");
   const messagesEndRef = useRef(null);
-  const lod = Array.from({ length: 10 }, (_, index) => index + 1);
-  const {SERVER_URL_V,userDetails, EmailUser,messages,setMessages,socket,
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const {userDetails, EmailUser,messages,setMessages,socket,
     friendRequests,loadingFriendRequests,loadingMessages}=useContext(MyContext);
   const filtUser = userDetails.find((fl) => fl.email === EmailUser);
   const router = useRouter();
@@ -96,11 +97,7 @@ function UserProfile({ params }) {
         message: messageInput,
         readorno: false,
       };
-      const response = await axios.post(`${SERVER_URL_V}/messages`, data,{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
-      });
+      const response = await axios.post(`/api/proxy/messages/post`, data);
       setMessages((prevMessages) => [...prevMessages, response.data]);
       setMessageInput("");
       setEmoji(true);
@@ -115,20 +112,13 @@ function UserProfile({ params }) {
   const deleteMsg = async () => {
     setLoadingd(true);
     try {
-      if (!window.confirm("Are you sure you want to delete this message?")) {
-        return;
-      }
-      await axios.delete(`${SERVER_URL_V}/messages/${idMsg}`,{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
-      });
+      const res = await axios.delete(`/api/proxy/messages/${idMsg}`);
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message._id !== idMsg)
       );
       setputdelete(true);
       setEmoji(true);
-      socket.emit("deleteMessage", idMsg);
+      socket.emit("deleteMessage", res.data);
     } catch (error) {
       console.error("Error deleting message:", error);
       toast({
@@ -137,6 +127,8 @@ function UserProfile({ params }) {
       });
     } finally {
       setLoadingd(false);
+      setIsConfirmOpen(false);
+
     }
   };
 
@@ -153,14 +145,7 @@ function UserProfile({ params }) {
         updated: "edited",
         readorno: false,
       };
-      const response = await axios.put(
-        `${SERVER_URL_V}/messages/${idMsg}`,
-        updatedMessage,{
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-          }
-        }
-      );
+      const response = await axios.put(`/api/proxy/messages/${idMsg}`, updatedMessage);
       setMessages((prevMessages) =>
         prevMessages.map((message) =>
           message._id === idMsg ? response.data : message
@@ -488,7 +473,7 @@ function UserProfile({ params }) {
                       </>
                     </button>
                     <button
-                      onClick={deleteMsg}
+                      onClick={()=>setIsConfirmOpen(true)}
                       className="bg-red-600 p-2 rounded-md  text-white hover:bg-red-600 hover:scale-105 duration-500"
                     >
                       <>
@@ -512,6 +497,12 @@ function UserProfile({ params }) {
               </div>
             )}
           </div>
+          <ConfirmModal
+            isOpen={isConfirmOpen}
+            message="Are you sure you want to delete this message?"
+            onConfirm={deleteMsg}
+            onCancel={() => setIsConfirmOpen(false)}
+          />  
           <div className={` absolute right-4 ${emoji ? "hidden" : "block"}`}>
             <Picker data={data} onEmojiSelect={addEmoji} maxFrequentRows={0} />
           </div>

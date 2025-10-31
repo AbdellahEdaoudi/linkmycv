@@ -1,96 +1,88 @@
 'use client';
 import React, { useContext, useState, useEffect } from 'react';
-import {Link, X, Edit3, Trash2 } from 'lucide-react';
+import {Link, X, Edit3, Trash2, CheckCircle } from 'lucide-react';
 import { MyContext } from '../Context/MyContext';
 import axios from 'axios';
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import CreateProfile from '../Components/CreateProfile';
 import LoadChatPage from '../Components/Loading/LoadChatPage';
 import ParticleComponent  from "../Components/ParticleComponent"
 import DOMPurify from 'dompurify';
 import WarningModal from "./Pages/WarningModal"
+import ConfirmModal from "./Pages/ConfirmModal"
 
 function EditUserLinks() {
-  const {SERVER_URL_V, EmailUser,userDetails,userLinks, setUserLinks} = useContext(MyContext);
-  const [loading, setLoading] = useState(true);
-  const [loadingt, setLoadingt] = useState(false);
+  const {EmailUser,userDetails,userLinks, setUserLinks} = useContext(MyContext);
+  const [loadingAction, setLoadingAction] = useState(null); 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [namelink, setNamelink] = useState('');
   const [link, setLink] = useState('');
-  const [Add, setAdd] = useState(true);
   const [editLinkId, setEditLinkId] = useState(null);
 
 
 
-
-
-  useEffect(() => {
-    if (userLinks) {
-      setLoading(false);
-    }
-  }, [userLinks]);
-
-
   const AddLink = async (e) => {
     e.preventDefault();
-    setLoadingt(true);
+    setLoadingAction('add');
     const regex = /<script.*?>.*?<\/script>|<iframe.*?>.*?<\/iframe>|javascript:|eval\(|alert\(|document\.cookie|window\.location|<a\s+href=["']?javascript:.*?["']?/i;
 
     if (regex.test(link) || regex.test(namelink)) {
-      setLoadingt(false);
+        setLoadingAction(null);
         document.getElementById('my_modal_2').showModal();
         return;
     }
     
      try {
       const sanitizedLink = DOMPurify.sanitize(link);
-      const response = await axios.post(`${SERVER_URL_V}/links`, {
+      const response = await axios.post(`/api/proxy/links`, {
         useremail: EmailUser,
         namelink,
-        link:sanitizedLink
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
+        link: sanitizedLink
       });
-      // console.log('Link added:', response.data);
       setUserLinks(prevLinks => [response.data.data, ...prevLinks]);
-      // toast("Link added successfully!");
+      toast(" added successfully!");
       setLink('');
       setNamelink('');
     } catch (error) {
       console.error('There was an error adding the link!', error);
       toast.error('Failed to add link.');
     } finally {
-      setLoadingt(false);
+      setLoadingAction(null);
     }
   };
-  
+  const EditLink = (lnk) => {
+    setEditLinkId(lnk._id);
+    setNamelink(lnk.namelink);
+    setLink(lnk.link);
+  };
   const UpdateLink = async (e) => {
     e.preventDefault();
-    setLoadingt(true);
+    setLoadingAction('update');
     const regex = /<script.*?>.*?<\/script>|<iframe.*?>.*?<\/iframe>|javascript:|eval\(|alert\(|document\.cookie|window\.location|<a\s+href=["']?javascript:.*?["']?/i;
 
     if (regex.test(link) || regex.test(namelink)) {
-      setLoadingt(false);
+        setLoadingAction(null);
         document.getElementById('my_modal_2').showModal();
         return;
     }
   
     try {
       const sanitizedLink = DOMPurify.sanitize(link);
-      const response = await axios.put(`${SERVER_URL_V}/links/${editLinkId}`, {
+      const response = await axios.put(`/api/proxy/links/${editLinkId}`, {
+        useremail: EmailUser,
         namelink,
         link: sanitizedLink
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-        }
       });
-      console.log('Link updated:', response.data);
       setUserLinks(prevLinks => 
         prevLinks.map(item => (item._id === editLinkId ? response.data.data : item))
       );
-      // toast("Link updated successfully!");
+      toast(
+      <p className="flex gap-3 items-center">
+        <CheckCircle /> Updated Successfully
+      </p>,
+      { autoClose: 3000 }
+    );
       setEditLinkId(null);
       setLink('');
       setNamelink('');
@@ -98,32 +90,35 @@ function EditUserLinks() {
       console.error('There was an error updating the link!', error);
       toast.error('Failed to update link.');
     } finally {
-      setLoadingt(false);
+      setLoadingAction(null);
     }
   };
   
-  const DeleteLink = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this link?");
-    
-    if (confirmDelete) {
-      try {
-        await axios.delete(`${SERVER_URL_V}/links/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-          }
-        });
-        setUserLinks(prevLinks => prevLinks.filter(item => item._id !== id));
-        setEditLinkId(null);
-        setNamelink('');
-        setLink('');
-        // toast("Link deleted successfully!");
-      } catch (error) {
-        console.error('There was an error deleting the link!', error);
-        toast.error('Failed to delete the link.');
-      }
-    }
-  };
-  
+  const handleConfirmDelete = async () => {
+  setConfirmOpen(false);
+  if (!deleteId) return;
+  setLoadingAction(`delete-${deleteId}`);
+  try {
+    await axios.delete(`/api/proxy/links/${deleteId}`);
+    setUserLinks(prev => prev.filter(item => item._id !== deleteId));
+    setEditLinkId(null);
+    setNamelink('');
+    setLink('');
+    toast("Link deleted successfully!");
+  } catch (error) {
+    console.error('There was an error deleting the link!', error);
+    toast.error('Failed to delete the link.');
+  } finally {
+    setLoadingAction(null);
+    setDeleteId(null);
+  }
+};
+
+const handleCancelDelete = () => {
+  setConfirmOpen(false);
+  setDeleteId(null);
+};
+
 
   if (!userDetails || userDetails.length === 0) {
     return <LoadChatPage />;
@@ -132,16 +127,6 @@ function EditUserLinks() {
   if (!filt) {
     return <CreateProfile />;
   }
-
-  
-  
-
-  const EditLink = (lnk) => {
-    setEditLinkId(lnk._id);
-    setNamelink(lnk.namelink);
-    setLink(lnk.link);
-    setAdd(false);
-  };
   
   return (
     <div className={` pt-4 pb-12 flex justify-center`}>
@@ -150,7 +135,8 @@ function EditUserLinks() {
       <section className='p-4 rounded-lg bg-gray-100 w-[110vh] mx-3 text-gray-800 z-10'>
         <div className='flex items-center justify-around mb-4'>
           <p className='text-3xl font-semibold text-gray-900'>Business Links</p>
-          <p onClick={() => {setEditLinkId(false)
+          <p onClick={() => {
+            setEditLinkId(editLinkId ? null : editLinkId)
             setNamelink("")
             setLink("")
           }} className='border p-2 rounded-full cursor-pointer bg-gray-700 hover:bg-gray-800 duration-300 g-gradient-to-r from-teal-500 to-teal-700 text-white'>
@@ -182,11 +168,13 @@ function EditUserLinks() {
               />
             </div>
             <button
-              disabled={loadingt}
+              disabled={loadingAction !== null}
               type="submit"
               className="w-full bg-teal-5 bg-sky-700 text-white px-4 py-2 rounded hover:bg-teal-600 transition duration-300"
             >
-              {loadingt ? <><i className="fa fa-spinner fa-spin"></i></> : editLinkId ? "Update" : "Add Link"}
+              {loadingAction === 'add' || loadingAction === 'update' ? (
+                <i className="fa fa-spinner fa-spin"></i>
+              ) : editLinkId ? "Update" : "Add Link"}
             </button>
           </form>
           <WarningModal />
@@ -215,13 +203,18 @@ function EditUserLinks() {
                    <p className='text-xs md:text-sm break-all mr-3'>{lnk.namelink}</p>
                   </div>
                   <div className=' flex space-x-3'>
-                   <button onClick={() =>{EditLink(lnk);window.scrollTo(0, 0);}} 
+                   <button onClick={() =>{
+                    EditLink(lnk);window.scrollTo(0, 0);}} 
                    className='text-blue-500 border p-1 rounded-full ring-1'>
                      <Edit3 />
                    </button>
-                   <button onClick={() => DeleteLink(lnk._id)} 
+                   <button onClick={() =>{
+                       setDeleteId(lnk._id), 
+                       setConfirmOpen(true)
+                      }}
+                   disabled={loadingAction !== null}
                    className='text-red-500 border p-1 rounded-full ring-1'>
-                     <Trash2 />
+                      {loadingAction === `delete-${lnk._id}` ? <i className="fa fa-spinner fa-spin"></i> : <Trash2 />}
                    </button>
                    </div>
                    </div>
@@ -229,6 +222,12 @@ function EditUserLinks() {
           }
         </div>
       </section>
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        message="Are you sure you want to delete this link?"
+      />
     </div>
   );
 }

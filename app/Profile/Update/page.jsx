@@ -15,17 +15,13 @@ import {
 } from "../../../components/ui/alert-dialog";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { bgcolorOptions } from "../../data/bgcolorOptions";
 import { MyContext } from "../../Context/MyContext";
 import { toast } from "react-toastify";
 import { CheckCircle } from "lucide-react";
 import ParticleComponent from "../../Components/ParticleComponent";
 import UpdatePLoading from "../../Components/Loading/UpdatePLoading";
 function NameUser() {
-  const { data, status } = useSession();
-  const user = data?.user;
-  const { SERVER_URL_V, EmailUser, userDetails, setUserDetails } =
-    useContext(MyContext);
+  const {EmailUser } =useContext(MyContext);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [fullname, setFullname] = useState("");
@@ -57,43 +53,56 @@ function NameUser() {
   const [experience, setExperience] = useState("");
   const [id, setid] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const User = userDetails.find((user) => user.email === EmailUser);
+  const [userUpdate, setuserUpdate] = useState("");
   const usernameInputRef = useRef(null);
+    // Fetch user data based on EmailUser
+    useEffect(() => {
+      const fetchUser = async () => {
+        if (!EmailUser) return;
+        try {
+          const res = await axios.get(`/api/proxy/users/getUser`);
+          setuserUpdate(res.data);
+          const User = res.data;
+          setFullname(res.data.fullname);
+          setEmail(User.email);
+          setUsername(User.username);
+          setPhoneNumber(User.phoneNumber);
+          setCountry(User.country);
+          setUrlimage(User.urlimage);
+          setBio(User.bio);
+          setFb(User.fb);
+          setWhatsapp(User.whatsapp);
+          setMessenger(User.messenger);
+          setReddit(User.reddit);
+          setTwitch(User.twitch);
+          setInstagram(User.instagram);
+          setTwitter(User.Twitter);
+          setLinkedin(User.Linkedin);
+          setGithub(User.github);
+          setYoutube(User.Youtube);
+          setTelegram(User.Telegram);
+          setSnapchat(User.snapchat);
+          setbgcolorp(User.bgcolorp);
+          setSkills(User.skills);
+          setServices(User.services);
+          setLanguages(User.languages);
+          setCategory(User.category);
+          setEducation(User.education);
+          setExperience(User.experience);
+          setid(User._id);
+        } catch (error) {
+        } finally {
+        }
+      };
+      fetchUser();
+    }, [EmailUser]);
+
   useEffect(() => {
-    if (User) {
-      setFullname(User.fullname);
-      setEmail(User.email);
-      setUsername(User.username);
-      setPhoneNumber(User.phoneNumber);
-      setCountry(User.country);
-      setUrlimage(User.urlimage);
-      setBio(User.bio);
-      setFb(User.fb);
-      setWhatsapp(User.whatsapp);
-      setMessenger(User.messenger);
-      setReddit(User.reddit);
-      setTwitch(User.twitch);
-      setInstagram(User.instagram);
-      setTwitter(User.Twitter);
-      setLinkedin(User.Linkedin);
-      setGithub(User.github);
-      setYoutube(User.Youtube);
-      setTelegram(User.Telegram);
-      setSnapchat(User.snapchat);
-      setbgcolorp(User.bgcolorp);
-      setSkills(User.skills);
-      setServices(User.services);
-      setLanguages(User.languages);
-      setCategory(User.category);
-      setEducation(User.education);
-      setExperience(User.experience);
-      setid(User._id);
-    }
     if (errorMessage && usernameInputRef.current) {
     usernameInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     usernameInputRef.current.focus();
        }
-  }, [User,errorMessage]);
+  }, [errorMessage]);
 
   const datasocial = [
     {
@@ -181,126 +190,71 @@ function NameUser() {
       placeholder: "Snapchat Link",
     },
   ];
-  // // Get Detail User
-  // useEffect(() => {
-  //   axios
-  //     .get(`${SERVER_URL_V}/users/${id}`,{
-  //       headers: {
-  //         'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-  //       }
-  //     })
-  //     .then((res) => {
-  //       const data = res.data;
-  //       setid(data._id);
-  //       setFullname(data.fullname);
-  //       setbgcolorp(data.bgcolorp);
-  //       setCountry(data.country)
-  //       setEmail(data.email);
-  //       setUsername(data.username);
-  //       setPhoneNumber(data.phoneNumber);
-  //       setUrlimage(data.urlimage);
-  //       setBio(data.bio);
-  //       setCategory(data.category);
-  //       setFb(data.fb);
-  //       setWhatsapp(data.whatsapp);
-  //       setMessenger(data.messenger);
-  //       setReddit(data.reddit);
-  //       setTwitch(data.twitch);
-  //       setInstagram(data.instagram);
-  //       setTwitter(data.Twitter);
-  //       setLinkedin(data.Linkedin);
-  //       setGithub(data.github);
-  //       setYoutube(data.Youtube);
-  //       setTelegram(data.Telegram);
-  //       setSnapchat(data.snapchat);
-  //       setEducation(data.education);
-  //       setExperience(data.experience);
-  //       setSkills(data.skills);
-  //       setServices(data.services);
-  //       setLanguages(data.languages)
-  //     })
-  //     .catch((error) => console.error("Error fetching user details:", error))
-  //     .finally(() => setLoading(false));
-  // }, [SERVER_URL_V,id]);
 
   const updateProfile = async (e) => {
-    setLoading(true);
-    e.preventDefault();
-    // Create FormData for sending mixed data types (including file)
-    const formData = new FormData();
-    formData.append("fullname", fullname);
-    formData.append("bgcolorp", bgcolorp);
-    formData.append("email", email);
-    formData.append("username", username);
-    formData.append("phoneNumber", phoneNumber);
-    formData.append("country", country);
-    formData.append("bio", bio);
-    formData.append("fb", fb);
-    formData.append("whatsapp", whatsapp);
-    formData.append("messenger", messenger);
-    formData.append("reddit", reddit);
-    formData.append("twitch", twitch);
-    formData.append("instagram", instagram);
-    formData.append("snapchat", snapchat);
-    formData.append("Linkedin", Linkedin);
-    formData.append("github", github);
-    formData.append("Twitter", Twitter);
-    formData.append("Youtube", Youtube);
-    formData.append("Telegram", Telegram);
-    formData.append("skills", skills);
-    formData.append("education", education);
-    formData.append("experience", experience);
-    formData.append("category", category);
-    formData.append("languages", languages);
-    formData.append("services", services);
-    formData.append("aboni", false);
+  e.preventDefault();
+  setLoading(true);
 
-    if (Imageprofil) {
-      const imageData = await fetch(Imageprofil);
-      const imageBlob = await imageData.blob();
-      formData.append("urlimage", new File([imageBlob], "profile_image"));
-    } else {
-      formData.append("urlimage", urlimage);
+  const formData = new FormData();
+  formData.append("fullname", fullname);
+  formData.append("bgcolorp", bgcolorp);
+  formData.append("email", email);
+  formData.append("username", username);
+  formData.append("phoneNumber", phoneNumber);
+  formData.append("country", country);
+  formData.append("bio", bio);
+  formData.append("fb", fb);
+  formData.append("whatsapp", whatsapp);
+  formData.append("messenger", messenger);
+  formData.append("reddit", reddit);
+  formData.append("twitch", twitch);
+  formData.append("instagram", instagram);
+  formData.append("snapchat", snapchat);
+  formData.append("Linkedin", Linkedin);
+  formData.append("github", github);
+  formData.append("Twitter", Twitter);
+  formData.append("Youtube", Youtube);
+  formData.append("Telegram", Telegram);
+  formData.append("skills", skills);
+  formData.append("education", education);
+  formData.append("experience", experience);
+  formData.append("category", category);
+  formData.append("languages", languages);
+  formData.append("services", services);
+  formData.append("aboni", false);
+
+  if (Imageprofil) {
+    const imageData = await fetch(Imageprofil);
+    const imageBlob = await imageData.blob();
+    formData.append("urlimage", new File([imageBlob], "profile_image"));
+  } else {
+    formData.append("urlimage", urlimage);
+  }
+
+  try {
+    const response = await axios.put(`/api/proxy/users/update/${email}`, formData);
+    
+    toast(
+      <p className="flex gap-3 items-center">
+        <CheckCircle /> Updated Successfully
+      </p>,
+      { autoClose: 3000 }
+    );
+    router.push("/Profile");
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    if (
+      error.response &&
+      error.response.status === 400 &&
+      error.response.data.error === "Username already exists"
+    ) {
+      setErrorMessage("Username already exists");
     }
-    try {
-      const response = await axios.put(
-        `${SERVER_URL_V}/users/${id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-          },
-        }
-      );
-      toast(
-        <p className="flex gap-3 items-center">
-          <CheckCircle /> Updated Successfully
-        </p>,
-        {
-          autoClose: 3000,
-        }
-      );
-      setUserDetails((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === id
-            ? { ...user, ...response.data }
-            : user
-        )
-      );
-      router.push("/Profile");
-    } catch (error) {
-      console.error("Error updating user details:", error);
-      if (
-        error.response &&
-        error.response.status === 400 &&
-        error.response.data.error === "Username already exists"
-      ) {
-        setErrorMessage("Username already exists");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const ImageProfileUpCloudinary = (e) => {
     if (e.target && e.target.files && e.target.files.length > 0) {
@@ -313,11 +267,11 @@ function NameUser() {
     }
   };
 
-  if (!userDetails || userDetails.length === 0 || !User || User.length === 0) {
+  if (!userUpdate || userUpdate.length === 0) {
     return <UpdatePLoading />;
   }
 
-  if (User && (email !== EmailUser)) {
+  if (userUpdate && email && email !== EmailUser) {
     return (
       <div className="flex justify-center items-start py-4 h-screen">
         <Image
@@ -341,7 +295,7 @@ function NameUser() {
 
   return (
     <section>
-      {User && (
+      {userUpdate && userUpdate.length !== 0 && (
         <div style={{ backgroundColor:bgcolorp }}
           className={`{bgcolorp} flex items-center justify-center text-xs md:text-base  pt-4 pb-6 duration-300`}
         >
@@ -456,7 +410,7 @@ function NameUser() {
                       <input
                         type="text"
                         name="category"
-                        placeholder="Developer"
+                        placeholder="Doctor"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="bg-gray-100 border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -593,94 +547,36 @@ function NameUser() {
                   />
                 </div>
               <div className="border-b border-gray-300 my-4"></div>
-              {/* Summary Section */}
-              <div className="mb-8">
-                <h3 className="text-2xl font-semibold text-indigo-500 mb-2">
-                  🔷 Summary
-                </h3>
-                <textarea
-                  name="Summary"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Enter Summary"
-                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-
-              {/* Services Section */}
-              <div className="mb-8">
-                <h3 className="text-2xl font-semibold text-indigo-500 mb-2">
-                  💼 Services
-                </h3>
-                <textarea
-                  name="services"
-                  value={services}
-                  onChange={(e) => setServices(e.target.value)}
-                  placeholder="Enter Services"
-                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-
-              {/* Education Section */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-                  🎓 Education
-                </h3>
-                <textarea
-                  name="Education"
-                  value={education}
-                  onChange={(e) => setEducation(e.target.value)}
-                  placeholder="Enter Education"
-                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div className="border-b border-gray-300 my-8"></div>
-              {/* Experience Section */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-                  ⭐ Experience
-                </h3>
-                <textarea
-                  name="Experience"
-                  value={experience}
-                  onChange={(e) => setExperience(e.target.value)}
-                  placeholder="Enter Experience"
-                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              {/* Skills Section */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-                  💡 Skills
-                </h3>
-                <textarea
-                  name="Skills"
-                  value={skills}
-                  onChange={(e) => setSkills(e.target.value)}
-                  placeholder="Enter Skills"
-                  className="bg-gray-100 border text-xs md:text-base  border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              {/* Languages Section */}
               <div>
-                <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-                  🌍 Languages
-                </h3>
-                <textarea
-                  name="languages"
-                  value={languages}
-                  onChange={(e) => setLanguages(e.target.value)}
-                  placeholder="Enter Languages"
-                  className="rounded-lg bg-white text-xs md:text-base  w-full px-3 h-32 py-2 border-2"
-                />
-              </div>
+              {[
+                { title: "Summary", emoji: "🔷", value: bio, onChange: (e) => setBio(e.target.value), placeholder: "Enter Summary" },
+                { title: "Services", emoji: "💼", value: services, onChange: (e) => setServices(e.target.value), placeholder: "Enter Services" },
+                { title: "Education", emoji: "🎓", value: education, onChange: (e) => setEducation(e.target.value), placeholder: "Enter Education" },
+                { title: "Experience", emoji: "⭐", value: experience, onChange: (e) => setExperience(e.target.value), placeholder: "Enter Experience" },
+                { title: "Skills", emoji: "💡", value: skills, onChange: (e) => setSkills(e.target.value), placeholder: "Enter Skills" },
+                { title: "Languages", emoji: "🌍", value: languages, onChange: (e) => setLanguages(e.target.value), placeholder: "Enter Languages" },
+              ].map((section, index) => (
+                <div key={index}>
+                  <div className="mb-4">
+                    <h3 className="text-2xl font-semibold text-indigo-500 mb-2">
+                      {section.emoji} {section.title}
+                    </h3>
+                    <textarea
+                      value={section.value}
+                      onChange={section.onChange}
+                      placeholder={section.placeholder}
+                      className="bg-gray-100 border text-xs md:text-base border-gray-300 rounded-lg w-full h-32 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+              ))}
               <div className="border-b border-gray-300 my-4"></div>
-
+            </div>
               {/* Submit Button */}
               <button
                 disabled={loading}
                 type="submit"
-                className="flex items-center justify-center mb-2 gap-2 bg-gray-800 text-white px-5 py-3 rounded-lg text-[14px] float-right"
+                className="flex items-center justify-center mb- gap-2 bg-gray-800 text-white px-5 py-3 rounded-lg text-[14px] float-right"
               >
                 {loading ? (
                   <>

@@ -39,11 +39,7 @@ export default function ContactForm() {
         return;
     }
     try {
-      await axios.post(`${SERVER_URL_V}/contacts`, { iduser, email, phoneNumber, message }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-        }
-      })
+      await axios.post(`/api/proxy/contacts`, { iduser,email,phoneNumber, message });
       toast(<p className='flex gap-3 items-center'><CheckCheck className="text-teal-500" /> Message sent successfully!</p>, {
         autoClose: 2000,
       })
@@ -100,6 +96,7 @@ export default function ContactForm() {
                       type="email"
                       id="email"
                       value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="pl-10 border-teal-300 focus:border-teal-500 focus:ring-teal-500 w-full"
                       placeholder="Enter your email"
                       required

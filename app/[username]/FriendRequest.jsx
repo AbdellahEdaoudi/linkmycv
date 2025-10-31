@@ -94,11 +94,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
     setLoading(true);
     const data = { from, to: To};
     try {
-      const response = await axios.post(`${SERVER_URL_V}/friends`, data, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
-        }
-      });
+      const response = await axios.post("/api/proxy/friends",data);
       const newRequest = response.data.data;
       setFriendRequests((prevRequests) => [...prevRequests, newRequest]);
       setfriendId(newRequest._id);
@@ -121,13 +117,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   const UpdateFriendRequest = async () => {
     setLoading(true);
     try {
-      const response = await axios.put(
-        `${SERVER_URL_V}/friends/${friendId}`,{},{
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-          }
-        }
-      );
+      const response = await axios.put(`/api/proxy/friends/${friendId}`);
       setFriendRequests((prevRequests) =>
         prevRequests.map((request) =>
           request._id === friendId ? response.data.data : request))
@@ -145,11 +135,7 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
   const DeleteRequest = async () => {
     setLoadingD(true);
     try {
-      await axios.delete(`${SERVER_URL_V}/friends/${friendId}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` // Include the token in the Authorization header
-        }
-      });
+      await axios.delete(`/api/proxy/friends/${friendId}`);
       setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== friendId));
       toast("Friend request canceled!");
       socket.emit("deleteFriendRequest", { to: To, id: friendId });

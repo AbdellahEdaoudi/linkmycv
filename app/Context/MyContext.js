@@ -45,7 +45,7 @@ export const MyProvider = ({ children }) => {
     });
     socket.on("receiveDeletedMessage", (deletedMessageId) => {
       setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg._id !== deletedMessageId)
+        prevMessages.filter((msg) => msg._id !== deletedMessageId._id)
       );
     });
 
@@ -71,36 +71,30 @@ export const MyProvider = ({ children }) => {
   }, [SERVER_URL,EmailUser]);
   
   // Fetch all data
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        setLoadingAll(true);
-      
-        const res = await axios.get(`${SERVER_URL_V}/alldata/${EmailUser}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-          },
-        });
-      
-        const data = res.data;
-      
-        if (data.success) {
-          setUserDetails(data.users || []);
-          setMessages(data.messages || []);
-          setFriendRequests(data.friends || []);
-          setUserLinks(data.links || []);
-        } else {
-          console.error("Failed to fetch data:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching all data:", error);
-      } finally {
-        setLoadingAll(false);
+useEffect(() => {
+  const fetchAllData = async () => {
+    try {
+      setLoadingAll(true);
+      const res = await axios.get(`/api/proxy/alldata`);
+      const data = res.data;
+      if (data.success) {
+        setUserDetails(data.users || []);
+        setMessages(data.messages || []);
+        setFriendRequests(data.friends || []);
+        setUserLinks(data.links || []);
+      } else {
+        console.error("Failed to fetch data:", data.message);
       }
-    };
-  
-    if (EmailUser) fetchAllData();
-  }, [SERVER_URL_V, EmailUser]);
+    } catch (error) {
+      console.error("Error fetching all data:", error);
+    } finally {
+      setLoadingAll(false);
+    }
+  };
+
+  if (EmailUser) fetchAllData();
+}, [EmailUser]);
+
 
 
   const latestNotifications = messages

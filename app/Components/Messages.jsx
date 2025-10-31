@@ -12,6 +12,7 @@ import { MyContext } from "../Context/MyContext";
 import { useRouter } from "next/navigation";
 import { CustomLinkify } from "./CustomLinkify";
 import InputLoadMessages from "./Loading/InputLoadMessages";
+import ConfirmModal from "./ConfirmModal";
 
 function Messages({ selectedUser }) {
   const { toast } = useToast();
@@ -23,9 +24,9 @@ function Messages({ selectedUser }) {
   const [emoji, setEmoji] = useState(true);
   const [putdelete, setputdelete] = useState(true);
   const [idMsg, setIdMsg] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const messagesEndRef = useRef(null);
-  const lod = Array.from({ length: 20 }, (_, index) => index + 1);
-  const {SERVER_URL_V, userDetails, EmailUser,
+  const {userDetails, EmailUser,
     messages, setMessages ,socket,friendRequests
   } =
     useContext(MyContext);
@@ -94,11 +95,7 @@ function Messages({ selectedUser }) {
         message: messageInput,
         readorno: false,
       };
-      const response = await axios.post(`${SERVER_URL_V}/messages`, data, {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-        },
-      });
+      const response = await axios.post(`/api/proxy/messages/post`, data);
       setMessages((prevMessages) => [...prevMessages, response.data]);
       setMessageInput("");
       setEmoji(true);
@@ -110,32 +107,27 @@ function Messages({ selectedUser }) {
     }
   };
   const deleteMsg = async () => {
-    setLoadingd(true);
-    try {
-      if (!window.confirm("Are you sure you want to delete this message?")) {
-        return;
-      }
-      await axios.delete(`${SERVER_URL_V}/messages/${idMsg}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-        },
-      });
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message._id !== idMsg)
-      );
-      setputdelete(true);
-      setEmoji(true);
-      socket.emit("deleteMessage", idMsg);
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      toast({
-        description: "Error deleting message. Please try again later.",
-        status: "error",
-      });
-    } finally {
-      setLoadingd(false);
-    }
-  };
+  setLoadingd(true);
+  try {
+    const res = await axios.delete(`/api/proxy/messages/${idMsg}`);
+    setMessages((prevMessages) =>
+      prevMessages.filter((message) => message._id !== idMsg)
+    );
+    setputdelete(true);
+    setEmoji(true);
+    socket.emit("deleteMessage", res.data);
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    toast({
+      description: "Error deleting message. Please try again later.",
+      status: "error",
+    });
+  } finally {
+    setLoadingd(false);
+    setIsConfirmOpen(false);
+  }
+};
+
   const updateMsg = async () => {
     setLoadingu(true);
     try {
@@ -149,15 +141,7 @@ function Messages({ selectedUser }) {
         updated: "edited",
         readorno: false,
       };
-      const response = await axios.put(
-        `${SERVER_URL_V}/messages/${idMsg}`,
-        updatedMessage,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-          },
-        }
-      );
+      const response = await axios.put(`/api/proxy/messages/${idMsg}`, updatedMessage);
       setMessages((prevMessages) =>
         prevMessages.map((message) =>
           message._id === idMsg ? response.data : message
@@ -471,7 +455,7 @@ function Messages({ selectedUser }) {
                       </>
                     </button>
                     <button
-                      onClick={deleteMsg}
+                      onClick={() => setIsConfirmOpen(true)}
                       className="bg-red-600 p-2 rounded-md  text-white hover:bg-red-600 hover:scale-105 duration-500"
                     >
                       <>
@@ -496,6 +480,12 @@ function Messages({ selectedUser }) {
             )}
           </div>
         </div>
+        <ConfirmModal
+          isOpen={isConfirmOpen}
+          message="Are you sure you want to delete this message?"
+          onConfirm={deleteMsg}
+          onCancel={() => setIsConfirmOpen(false)}
+        />  
         {/* Emojes */}
         <div className={` absolute right-4 ${emoji ? "hidden" : "block"}`}>
           <Picker data={data} onEmojiSelect={addEmoji} maxFrequentRows={0} />

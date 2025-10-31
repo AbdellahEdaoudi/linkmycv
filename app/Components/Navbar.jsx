@@ -128,7 +128,7 @@ const filteredUserDetails = userDetails
               onClick={() => { router.push("/Home"); setSetting(true); setFrReq(true); setNotification(true)}}
               className="flex items-center flex-shrink-0 md:w-auto  hover:scale-105 duration-300 cursor-pointer">
               <Image src="/favicon.png" alt="Logo" width={45} height={45} />
-              <Image src="/Logo.png" alt="Logo" width={160} height={70} className="md:block sm:block hidden w-auto h-auto"/>
+              <Image src="/Logo.png" priority alt="Logo" width={160} height={70} className="md:block sm:block hidden w-auto h-auto"/>
             </div>
             {/* SEARCHE */}
             <div className={`md:mx-0 mx-2 ${status === "unauthenticated" && "hidden"}`}>

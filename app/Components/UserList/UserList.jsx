@@ -6,7 +6,7 @@ import { MyContext } from "../../Context/MyContext";
 import DOMPurify from 'dompurify';
 
 function UserList({ selectedUser, setSelectedUser }) {
-  const {userDetails,EmailUser,SERVER_URL_V,messages, setMessages}=useContext(MyContext);
+  const {userDetails,EmailUser,messages, setMessages}=useContext(MyContext);
   const [searchQuery,setSearchQuery] = useState("");
   const messagesEndRef = useRef(null);
   // Handle User Click
@@ -15,18 +15,11 @@ function UserList({ selectedUser, setSelectedUser }) {
         setSelectedUser(User);
         localStorage.setItem("SelectedUser", JSON.stringify(User));
         if (lastMessage?.from && lastMessage?.to && lastMessage.readorno === false && lastMessage.to === EmailUser) {
-          await axios.put(
-            `${SERVER_URL_V}/messages/readorno`,
-            {
-              fromEmail: lastMessage.from,
-              toEmail: lastMessage.to,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-              },
-            }
-          );
+          await axios.put("/api/proxy/messages/readorno", {
+            fromEmail: User.email,
+            toEmail: EmailUser,
+          });
+
           setMessages((prevMessages) =>
             prevMessages.map((message) =>
               message.from === lastMessage.from &&

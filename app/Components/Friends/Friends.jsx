@@ -1,20 +1,21 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import io from "socket.io-client";
 import { MyContext } from "../../Context/MyContext";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { UserX } from "lucide-react";
-import { set } from "lodash";
+import ConfirmModal from "../ConfirmModal";
 
 function Friends() {
-  const { SERVER_URL_V, EmailUser, userDetails,setFriendRequests,
+  const {EmailUser, userDetails,setFriendRequests,
     friendRequests,socket,loadingFriendRequests} =
     useContext(MyContext);
   const [loadingStatus, setLoadingStatus] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [currentRequestId, setCurrentRequestId] = useState(null);
   const router = useRouter();
 
   const highlightText = (text) => {
@@ -23,33 +24,32 @@ function Friends() {
     return text.replace(regex, "<mark>$1</mark>");
   };
 
-  const DeleteRequest = async (requestId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this request?"
-    );
-    if (!confirmDelete) return;
+  const confirmDeleteRequest = async () => {
+  if (!currentRequestId) return;
 
-    setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: true } }));
-    try {
-      const res = await axios.delete(`${SERVER_URL_V}/friends/${requestId}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-        },
-      });
-      const requestTo = res.data.requestTo;
-      const requestFrom = res.data.requestFrom;
-      setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
-      toast("Unfriend successfully");
-      socket.emit('deleteFriendRequest', { to: 
-        requestFrom === EmailUser ? requestTo : requestFrom
-        , id: requestId });
-    } catch (error) {
-      console.error("Error deleting request:", error.message);
-      toast.error("Failed to delete request");
-    } finally {
-      setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: false } }));
-    }
-  };
+  setLoadingStatus((prev) => ({ ...prev, [currentRequestId]: { delete: true } }));
+  try {
+    const res = await axios.delete(`/api/proxy/friends/${currentRequestId}`);
+    const requestTo = res.data.requestTo;
+    const requestFrom = res.data.requestFrom;
+
+    setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== currentRequestId));
+
+    toast("Unfriend successfully");
+    socket.emit('deleteFriendRequest', { 
+      to: requestFrom === EmailUser ? requestTo : requestFrom,
+      id: currentRequestId
+    });
+  } catch (error) {
+    console.error("Error deleting request:", error.message);
+    toast.error("Failed to delete request");
+  } finally {
+    setLoadingStatus((prev) => ({ ...prev, [currentRequestId]: { delete: false } }));
+    setIsConfirmOpen(false);
+    setCurrentRequestId(null);
+  }
+};
+
 
   const FriendsCount = friendRequests.filter(
     (fl) =>
@@ -150,7 +150,10 @@ function Friends() {
                   <div className="flex flex-row-reverse gap-2 mr-4">
                     <button
                       className="bg-blue-600 text-xs hover:scale-95 rounded-lg p-1 duration-200"
-                      onClick={() => DeleteRequest(request._id)}
+                       onClick={() => {
+                         setCurrentRequestId(request._id);
+                         setIsConfirmOpen(true);
+                       }}
                       disabled={loadingStatus[request._id]?.delete}
                     >
                       {loadingStatus[request._id]?.delete ? (
@@ -176,6 +179,15 @@ function Friends() {
           You have no friends yet
         </p>
       )}
+        <ConfirmModal
+          isOpen={isConfirmOpen}
+          message="Are you sure you want to delete this friend ?"
+          onConfirm={confirmDeleteRequest}
+          onCancel={() => {
+            setIsConfirmOpen(false);
+            setCurrentRequestId(null);
+          }}
+        />
     </div>
   );
 }

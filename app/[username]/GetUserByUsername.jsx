@@ -54,25 +54,22 @@ function GetUserByUsername({ params }) {
 
   // Get users
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoadingUsers(true); 
-      try {
-        const res = await axios.get(`${SERVER_URL_V}/users/username/${params.username}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`
-          }
-        });
-        setuserDetailsG(res.data.user);
-        setUserLinks(res.data.links);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await axios.get(`/api/proxy/users/${params.username}`);
+      setuserDetailsG(res.data.user);
+      setUserLinks(res.data.links);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
-    fetchUsers();
-  }, [SERVER_URL_V,params.username]);
+  fetchUsers();
+}, [params.username]);
+
 
   const CopyLinkProfil = () => {
     const urlToCopy = `${CLIENT_URL}${path}`;

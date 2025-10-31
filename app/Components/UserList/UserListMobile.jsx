@@ -21,15 +21,10 @@ function UserListMobile({ selectedUser, setSelectedUser }) {
       localStorage.setItem("SelectedUser", JSON.stringify(user));
 
       if (lastMessage?.from && lastMessage?.to && lastMessage.readorno === false && lastMessage.to === EmailUser) {
-        await axios.put(
-          `${SERVER_URL_V}/messages/readorno`,
-          {
-            fromEmail: lastMessage.from,
-            toEmail: lastMessage.to,
-          },
-          { headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` } }
-        );
-
+        await axios.put("/api/proxy/messages/readorno", {
+          fromEmail: lastMessage.from,
+          toEmail: lastMessage.to,
+        });
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
             msg.from === lastMessage.from &&

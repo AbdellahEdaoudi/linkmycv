@@ -27,22 +27,37 @@ import QrcodeProfile from "./QrcodeProfile";
 import CreateProfile from "../Components/CreateProfile";
 import ParticleComponent from "../Components/ParticleComponent";
 import Loadingpage from "../Components/Loading/LoadingPage";
+import axios from "axios";
 
 function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const { CLIENT_URL, userDetails, EmailUser } = useContext(MyContext);
-  const [filtUser, setFiltUser] = useState(null);
+  const [userUpdate, setuserUpdate] = useState("");
 
 
+    // Fetch user data based on EmailUser
+      useEffect(() => {
+      const fetchUser = async () => {
+        if (!EmailUser) return;
+        try {
+          console.log("Fetching user data for email:", EmailUser);
+          const res = await axios.get(`/api/proxy/users/getUser`);
+          setuserUpdate(res.data);
+          console.log("Fetched data:", res.data); // استخدم res.data مباشرة
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchUser();
+    }, [EmailUser]);
 
-  useEffect(() => {
-    const FindUser = userDetails.find((fl) => fl.email === EmailUser);
-    setFiltUser(FindUser);
-  }, [userDetails, EmailUser]);
 
-
-  if (!filtUser) {
+  if (!EmailUser || !userUpdate || userUpdate.length === 0) {
     return <Loadingpage/>;
+  }
+  const filt = userDetails.find((fl) => fl.email === EmailUser);
+  if (!filt) {
+    return <CreateProfile />;
   }
   const datasocial = [
     { key: "Linkedin", src: "/Icons/link.svg", alt: "LinkedIn" },
@@ -59,33 +74,16 @@ function ProfilePage() {
     { key: "snapchat", src: "/Icons/snap.svg", alt: "Snapchat" },
   ];
 
-  const datamodul = filtUser
+  const datamodul = userUpdate
     ? [
-        { name: "🔷 Summary", data: filtUser.bio },
-        { name: "💼 Services", data: filtUser.services },
-        { name: "🎓 Education", data: filtUser.education },
-        { name: "⭐ Experience", data: filtUser.experience },
-        { name: "💡 Skills", data: filtUser.skills },
-        { name: "🌍 Languages", data: filtUser.languages },
+        { name: "🔷 Summary", data: userUpdate.bio },
+        { name: "💼 Services", data: userUpdate.services },
+        { name: "🎓 Education", data: userUpdate.education },
+        { name: "⭐ Experience", data: userUpdate.experience },
+        { name: "💡 Skills", data: userUpdate.skills },
+        { name: "🌍 Languages", data: userUpdate.languages },
       ]
     : [];
-
-  const ListDisk = (data) => {
-    return (
-      <ul className="list-disc ml-6">
-        {data.split("\n").map((sp, i) => (
-          <li key={i}>{sp}</li>
-        ))}
-      </ul>
-    );
-  };
-  if (!userDetails || userDetails.length === 0) {
-    return <Loadingpage />
-  }
-  const filt = userDetails.find((fl) => fl.email === EmailUser);
-  if (!filt) {
-    return <CreateProfile />;
-  }
   const CV = [
     {
       title: "🔷 Summary",
@@ -115,12 +113,9 @@ function ProfilePage() {
   
   return (
     <div>
-      {userDetails.filter((fl) => fl.email === EmailUser)
-        .map((UserF, i) => {
-          return (
-            <div key={i} className="relative">
-          <ParticleComponent bgcolor={UserF.bgcolorp}/> 
-           <div className={`flex items-start  justify-center text-xs md:text-base   pt-4 pb-20  ${UserF.bgcolorp}  `}>
+      <div className="relative">
+          <ParticleComponent bgcolor={userUpdate.bgcolorp}/> 
+           <div className={`flex items-start  justify-center text-xs md:text-base   pt-4 pb-20  ${userUpdate.bgcolorp}  `}>
             <div className={`w-[800px] mx-4 relative  bg-slate-50 px-4 md:px-8 pt-4 pb-8 rounded-lg border-2 shadow-lg`} >
               {/* Image Profile and info user */}
               <div className={`border flex flex-col md:flex-row sm:flex-row sm:items-start  md:items-start items- gap-2 sm:gap-5 md:gap-5 mb-3 p-4 bg-white rounded-lg shadow-md`}>
@@ -131,14 +126,14 @@ function ProfilePage() {
                          <Image
                            width={140}
                            height={140}
-                           src={UserF.urlimage}
+                           src={userUpdate.urlimage}
                            alt="Profile Image"
                            className="object-cover md:block sm:block hidden cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
                          />
                          <Image
                            width={100}
                            height={100}
-                           src={UserF.urlimage}
+                           src={userUpdate.urlimage}
                            alt="Profile Image"
                            className="object-cover md:hidden  sm:hidden block  cursor-pointer border-4  border-green-600 shadow-lg  rounded-full  duration-500"
                          />
@@ -150,7 +145,7 @@ function ProfilePage() {
                          <Image
                            width={250}
                            height={250}
-                           src={UserF.urlimage}
+                           src={userUpdate.urlimage}
                            alt="Profile Image"
                            className="object-cover rounded-full cursor-pointer"
                          />
@@ -168,48 +163,48 @@ function ProfilePage() {
                 {/* Content */}
                 <div className="text-cente sm:text-left md:text-left">
              <h2 className="font-bold text-2xl text-gray-800">
-               {UserF.fullname}
+               {userUpdate.fullname}
              </h2>
              {/* Email */}
              <p className="text-gray-600 flex items-center justify-cente md:justify-start gap-2 mt-1">
                <span className="text-green-500">
                  <MailCheck width={18} />
                </span>{" "}
-               {UserF.email}
+               {userUpdate.email}
              </p>
              {/* Username and Country */}
              <p className="text-gray-600  flex  items-center justify-cente sm:justify-start md:justify-start md: gap-2 mt-1">
-               <span className="text-green-900">@ {UserF.username}</span>
-               {UserF.country && (
+               <span className="text-green-900">@ {userUpdate.username}</span>
+               {userUpdate.country && (
                  <span className="flex items-center gap-1 justify-cente">
                    <MapPin width={18} style={{ color: "red" }} />
-                   {UserF.country}
+                   {userUpdate.country}
                  </span>
                )}
              </p>
               {/* Phone Number and BLinks */}
              <div className="flex items-center gap-2 justify-cente sm:justify-start md:justify-start mt-">
-              {UserF.phoneNumber && (
+              {userUpdate.phoneNumber && (
                <p className="text-green-800 flex items-center justify-cente sm:justify-start md:justify-start gap-2 mt-">
                  <Phone width={18} />
-                 {UserF.phoneNumber}
+                 {userUpdate.phoneNumber}
                </p>
              )}
             {/* Business Links */}
             <div >
-              <UserLinks emailuser={UserF.email} />
+              <UserLinks emailuser={userUpdate.email} />
             </div>
              </div>
                   {/* datasocial */}
                   <div className="my-1">
-                    <ul className="flex flex-wrap gap-4 justify-center">
+                    <ul className="flex flex-wrap gap-4 justify-start">
                       {datasocial.map(
                         (item, i) =>
-                          UserF[item.key] && (
+                          userUpdate[item.key] && (
                             <li key={i}>
                               <a
                                 className="flex hover:scale-105 items-center justify-center bg-gray-100 hover:bg-gray-200 px-2 py-1.5 rounded-md border shadow-md transition duration-300"
-                                href={UserF[item.key]}
+                                href={userUpdate[item.key]}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -238,11 +233,11 @@ function ProfilePage() {
                   <PenOff className="w-6 h-6" />
                 </Link>
                 {/* QrCode Profile */}
-                <QrcodeProfile UserF={UserF} />
+                <QrcodeProfile UserF={userUpdate} />
                 {/* Link Profile */}
                 <div
                   className="flex gap-2 hover:scale-105 duration-300 hover:text-sky-400  "
-                  href={`/${UserF.username}`}
+                  href={`/${userUpdate.username}`}
                 >
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -261,7 +256,7 @@ function ProfilePage() {
                             <button
                               className="p-2 bg-green-300 rounded-md my-2 text-black font-medium"
                               onClick={() => {
-                                const url = `${CLIENT_URL}/${UserF.username}`;
+                                const url = `${CLIENT_URL}/${userUpdate.username}`;
 
                                 if (navigator.share) {
                                   navigator
@@ -283,7 +278,7 @@ function ProfilePage() {
                           <button
                             className="p-2 bg-green-300 rounded-md my-2 text-black font-medium"
                             onClick={() => {
-                              const urlToCopy = `${CLIENT_URL}/${UserF.username}`;
+                              const urlToCopy = `${CLIENT_URL}/${userUpdate.username}`;
                               navigator.clipboard
                                 .writeText(urlToCopy)
                                 .then(() => {
@@ -307,7 +302,7 @@ function ProfilePage() {
               </div>
               {/* category */}
               <p className="text-base font-semibold text-center text-gray-800 bg-gray-100 p-2 my-2 rounded border border-gray-300">
-                {UserF.category}
+                {userUpdate.category}
               </p>
               {/* Modul */}
         <div className={` flex flex-wrap justify-center  gap-2 mb-2`}>
@@ -363,9 +358,6 @@ function ProfilePage() {
             </div>
           </div>
           </div>
-          )
-          
-        })}
     </div>
   );
 }

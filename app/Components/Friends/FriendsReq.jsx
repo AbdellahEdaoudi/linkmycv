@@ -1,19 +1,20 @@
 "use client";
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
 import { MyContext } from '../../Context/MyContext';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { set } from 'lodash';
+import ConfirmModal from '../ConfirmModal';
 
 function FriendsReq() {
-    const { SERVER_URL_V, EmailUser, userDetails,setFriendRequests,
+    const {EmailUser, userDetails,setFriendRequests,
         friendRequests,socket,loadingFriendRequests} =
         useContext(MyContext);
     const [loadingStatus, setLoadingStatus] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [currentRequestId, setCurrentRequestId] = useState(null);
     const router = useRouter();
 
 
@@ -24,16 +25,9 @@ function FriendsReq() {
     };
 
     const UpdateRequest = async (requestId) => {
-        const confirmUpdate = window.confirm('Are you sure you want to accept this request?');
-        if (!confirmUpdate) return;
-
         setLoadingStatus((prev) => ({ ...prev, [requestId]: { update: true } }));
         try {
-            const response = await axios.put(`${SERVER_URL_V}/friends/${requestId}`,{},{
-                headers: {
-                  'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-                }
-              });
+            const response = await axios.put(`/api/proxy/friends/${requestId}`);
               setFriendRequests((prevRequests) =>
                 prevRequests.map((request) =>
                   request._id === requestId ? response.data.data : request
@@ -49,26 +43,22 @@ function FriendsReq() {
         }
     };
 
-    const DeleteRequest = async (requestId) => {
-        const confirmDelete = window.confirm('Are you sure you want to delete this request?');
-        if (!confirmDelete) return;
-
-        setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: true } }));
+    const DeleteRequest = async () => {
+          if (!currentRequestId) return;
+        setLoadingStatus((prev) => ({ ...prev, [currentRequestId]: { delete: true } }));
         try {
-            const res = await axios.delete(`${SERVER_URL_V}/friends/${requestId}`,{
-                headers: {
-                  'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
-                }
-              });
+            const res = await axios.delete(`/api/proxy/friends/${currentRequestId}`);
             const requestFrom = res.data.requestFrom;
-            setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== requestId));
+            setFriendRequests(prevRequests => prevRequests.filter(request => request._id !== currentRequestId));
             toast('Request deleted successfully');
-            socket.emit('deleteFriendRequest', { to: requestFrom, id: requestId });
+            socket.emit('deleteFriendRequest', { to: requestFrom, id: currentRequestId });
         } catch (error) {
             console.error('Error deleting request:', error.message);
             toast.error('Failed to delete request');
         } finally {
-            setLoadingStatus((prev) => ({ ...prev, [requestId]: { delete: false } }));
+            setLoadingStatus((prev) => ({ ...prev, [currentRequestId]: { delete: false } }));
+            setIsConfirmOpen(false);
+            setCurrentRequestId(null);
         }
     };
     const frCount = friendRequests
@@ -153,7 +143,10 @@ return (
                                         </button>
                                         <button 
                                             className="bg-red-600 text-sm hover:scale-95 rounded-lg p-1 duration-200"
-                                            onClick={() => DeleteRequest(mp._id)} 
+                                            onClick={() => {
+                                              setCurrentRequestId(mp._id);
+                                              setIsConfirmOpen(true);
+                                            }} 
                                             disabled={loadingStatus[mp._id]?.delete}
                                         >
                                             {loadingStatus[mp._id]?.delete ? 
@@ -172,6 +165,15 @@ return (
             <p className="text-sm py-5 flex items-center justify-center">No pending friend requests</p>
 
         )}
+        <ConfirmModal
+          isOpen={isConfirmOpen}
+          message="Are you sure you want to delete this friend request ?"
+          onConfirm={DeleteRequest}
+          onCancel={() => {
+            setIsConfirmOpen(false);
+            setCurrentRequestId(null);
+          }}
+        />
     </div>
 );
 
