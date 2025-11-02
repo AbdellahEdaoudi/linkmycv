@@ -196,6 +196,9 @@ function NameUser() {
   setLoading(true);
 
   const formData = new FormData();
+  const safeAppend = (key, value) => {
+    formData.append(key, value ?? "");
+  };
   formData.append("fullname", fullname);
   formData.append("bgcolorp", bgcolorp);
   formData.append("email", email);

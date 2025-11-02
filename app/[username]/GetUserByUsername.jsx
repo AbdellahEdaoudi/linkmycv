@@ -273,7 +273,7 @@ function GetUserByUsername({ params }) {
         </nav>
         {/* Category */}
         <p className="text-base font-semibold text-center text-gray-800 bg-gray-100 p-2 my-2 rounded border border-gray-300">
-        {`${userDetailsG.category}`}
+        {`${userDetailsG?.category}`}
         </p>
         {/* Modul */}
         <div className={` ${language === "ar" ? 'list-disc-rtl' : 'list-disc-ltr'} flex flex-wrap justify-center  gap-2 mb-2`}>

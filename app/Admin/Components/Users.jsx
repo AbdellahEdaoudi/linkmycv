@@ -4,10 +4,11 @@ import { MyContext } from "../../Context/MyContext";
 import { CircleUser } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { apiRequest } from "./apiRequest";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Users() {
-  const { userDetails, SERVER_URL_V } = useContext(MyContext);
+  const { userDetails} = useContext(MyContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState(userDetails);
   const [loading, setLoading] = useState(false);
@@ -31,18 +32,10 @@ function Users() {
     if (confirmDelete) {
       setLoading(true);
       try {
-        await apiRequest({
-          method: 'DELETE',
-          url: `${SERVER_URL_V}/users/${id}`,
-        });
+        await axios.delete(`/api/proxy/admin/users/${id}`);
         setFilteredUsers(filteredUsers.filter(user => user._id !== id));
       } catch (error) {
-        if (error.response && error.response.status === 403) {
-          alert("Your session has expired. Please log in again.");
-          router.push("/Login");
-        } else {
-          alert("Error deleting user");
-        }
+          toast.error("Error deleting user");
       } finally {
         setLoading(false); 
       }

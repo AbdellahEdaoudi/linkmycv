@@ -34,10 +34,7 @@ export default function ContactsPage() {
   useEffect(() => {
     const fetchContacts = async () => {
         try {
-            const response = await apiRequest({
-                method: 'GET',
-                url: `${SERVER_URL_V}/contacts`,
-            });
+            const response = await axios.get(`/api/proxy/admin/contacts`);
             setContacts(response.data);
         } catch (error) {
           if (error.response && error.response.status === 403) {
@@ -55,20 +52,11 @@ export default function ContactsPage() {
   const DeleteMessage = async (id) => {
     try {
         // Call the apiRequest function to delete the contact
-        await apiRequest({
-            method: 'DELETE',
-            url: `${SERVER_URL_V}/contacts/${id}`,
-        });
-
+        await axios.delete(`/api/proxy/admin/contacts/${id}`);
         // Update the contacts state by filtering out the deleted contact
         setContacts(contacts.filter(contact => contact._id !== id));
     } catch (error) {
-        if (error.response && error.response.status === 403) {
-          setError("Your session has expired. Please log in again.");
-          router.push("/Login");
-        } else {
           setError("Error fetching Users");
-        }
     }
 };
 

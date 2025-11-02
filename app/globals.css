@@ -8,6 +8,9 @@
     transform: rotate(360deg);
   }
 }
+.imganim{
+    border-radius: 77% 23% 60% 40% / 25% 60% 40% 75% ;
+  }
 
 .spinner {
   border-width: 4px;
