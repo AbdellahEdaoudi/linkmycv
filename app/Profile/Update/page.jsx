@@ -243,7 +243,6 @@ function NameUser() {
       </p>,
       { autoClose: 3000 }
     );
-    router.push("/Profile");
   } catch (error) {
     console.error("Error updating user details:", error);
     if (
