@@ -1,12 +1,12 @@
 export const Metadata = {
-  title: "LinkerFolio - Your Ultimate Global Digital Portfolio & Social Hub",
-  description: "Discover LinkerFolio, your go-to platform for managing a professional digital portfolio and social media links. Showcase your personal brand globally with our customizable profiles, automatic translation, and unique QR codes.",
-  keywords: "LinkerFolio,Portfolio, LinkFolio, FolioLink, LinkFusion, FolioConnect, LinkStream, FolioBridge, LinkVault, FolioChain, LinkSphere, FolioHub, LinkNest, FolioSync, Linktree, Carrd, About.me, Linkin.bio, Taplink, Lnk.bio, Shorby, Bio.fm, digital portfolio, online presence, personal branding, social media integration, customizable profiles, QR code generator, global networking, career opportunities, job search, resume showcase",
+  title: "LinkerFolio - Your Ultimate Global Digital Resume & Social Hub",
+  description: "Discover LinkerFolio, your go-to platform for managing a professional digital Resume and social media links. Showcase your personal brand globally with our customizable profiles, automatic translation, and unique QR codes.",
+  keywords: "LinkerFolio,Resume, LinkFolio, FolioLink, LinkFusion, FolioConnect, LinkStream, FolioBridge, LinkVault, FolioChain, LinkSphere, FolioHub, LinkNest, FolioSync, Linktree, Carrd, About.me, Linkin.bio, Taplink, Lnk.bio, Shorby, Bio.fm, digital Resume, online presence, personal branding, social media integration, customizable profiles, QR code generator, global networking, career opportunities, job search, resume showcase",
   author: "Abdellah Edaoudi",
   robots: "index, follow",
   openGraph: {
-    title: "LinkerFolio - Your Ultimate Global Digital Portfolio & Social Hub",
-    description: "Elevate your professional identity with LinkerFolio. Manage your portfolio and social media links, generate QR codes, and share seamlessly with a global audience.",
+    title: "LinkerFolio - Your Ultimate Global Digital Resume & Social Hub",
+    description: "Elevate your professional identity with LinkerFolio. Manage your Resume and social media links, generate QR codes, and share seamlessly with a global audience.",
     image: "https://res.cloudinary.com/dssrnghtr/image/upload/v1726176794/mptxnsr28gdxrdzpgp5i.png",
     url: "https://linkerfolio.vercel.app",
     type: "website",
@@ -21,8 +21,8 @@ export const Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkerFolio - Your Ultimate Global Digital Portfolio & Social Hub",
-    description: "Explore LinkerFolio, the platform that transforms how you showcase your professional identity. Create and share your digital portfolio and social media links globally.",
+    title: "LinkerFolio - Your Ultimate Global Digital Resume & Social Hub",
+    description: "Explore LinkerFolio, the platform that transforms how you showcase your professional identity. Create and share your digital Resume and social media links globally.",
     image: "https://res.cloudinary.com/dssrnghtr/image/upload/v1732376340/pqmm7vzect1nbqa5smy9.png",
     creator: "@Edaoudi_abde",
     site: "@LinkerFolio",

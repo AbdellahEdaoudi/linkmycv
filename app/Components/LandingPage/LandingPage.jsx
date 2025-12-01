@@ -46,7 +46,7 @@ export default function LandingPage() {
                   </span>
                 </h1>
                 <p className="mx-auto lg:mx-0 max-w-[600px] text-slate-300 md:text-xl">
-                With LinkerFolio, combine your professional portfolio and social connections
+                With LinkerFolio, combine your professional Resume and social connections
                  in one dynamic digital hub.
                  Connect, share, and step into limitless opportunities in the digital world.
                 </p>
@@ -95,7 +95,7 @@ export default function LandingPage() {
               {[
                    {
                      icon: Share2,
-                     title: "Professional Portfolio",
+                     title: "Professional Resume",
                      description:
                        "A stylish design that highlights your experience, skills, and education attractively.",
                    },
@@ -234,7 +234,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-slate-300 text-lg md:text-xl text-center max-w-3xl mx-auto">
             LinkerFolio is designed to streamline the process of showcasing your professional 
-            portfolio and social media profiles in one place, helping you manage your digital 
+            Resume and social media profiles in one place, helping you manage your digital 
             identity effortlessly. Our mission is to expand your career opportunities 
             and empower you to build a compelling digital presence that draws attention
              and creates connections around you.
