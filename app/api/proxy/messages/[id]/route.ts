@@ -6,12 +6,13 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 
 // ✅ UPDATE message
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await params;
   const body = await req.json();
   const token = jwt.sign(
     { email: session.user.email },
@@ -21,7 +22,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const backendUrl = process.env.BACKEND_URL;
-    const response = await axios.put(`${backendUrl}/messages/${params.id}`, body, {
+    const response = await axios.put(`${backendUrl}/messages/${id}`, body, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return NextResponse.json(response.data, { status: response.status });
@@ -32,12 +33,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // ✅ DELETE message
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await params;
   const token = jwt.sign(
     { email: session.user.email },
     process.env.NEXTAUTH_SECRET as string,
@@ -46,7 +48,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   try {
     const backendUrl = process.env.BACKEND_URL;
-    const response = await axios.delete(`${backendUrl}/messages/${params.id}`, {
+    const response = await axios.delete(`${backendUrl}/messages/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return NextResponse.json(response.data, { status: response.status });

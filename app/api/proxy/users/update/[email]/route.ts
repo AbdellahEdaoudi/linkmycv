@@ -4,13 +4,15 @@ import { authOptions } from "../../../../../../lib/nextAuth";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 
-export async function PUT(req: Request, { params }: { params: { email: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ email: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
+    const { email } = await params;
 
     const token = jwt.sign(
       { email: session.user.email },
@@ -21,10 +23,10 @@ export async function PUT(req: Request, { params }: { params: { email: string } 
     const backendUrl = process.env.BACKEND_URL;
     const formData = await req.formData();
 
-    console.log("🔹 Sending update to backend:", `${backendUrl}/users/${params.email}`);
+    console.log("🔹 Sending update to backend:", `${backendUrl}/users/${email}`);
 
     const response = await axios.put(
-      `${backendUrl}/users/${params.email}`,
+      `${backendUrl}/users/${email}`,
       formData,
       {
         headers: {

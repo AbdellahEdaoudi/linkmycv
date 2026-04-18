@@ -4,11 +4,13 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 import { authOptions } from "../../../../../lib/nextAuth";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
+  const { id } = await params;
 
   const token = jwt.sign(
     { email: session.user.email },
@@ -18,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const backendUrl = process.env.BACKEND_URL;
-    const response = await axios.put(`${backendUrl}/friends/${params.id}`, {}, {
+    const response = await axios.put(`${backendUrl}/friends/${id}`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -32,11 +34,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
+  const { id } = await params;
 
   const token = jwt.sign(
     { email: session.user.email },
@@ -46,7 +50,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   try {
     const backendUrl = process.env.BACKEND_URL;
-    const response = await axios.delete(`${backendUrl}/friends/${params.id}`, {
+    const response = await axios.delete(`${backendUrl}/friends/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

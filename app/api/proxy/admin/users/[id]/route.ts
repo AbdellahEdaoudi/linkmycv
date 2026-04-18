@@ -5,11 +5,13 @@ import jwt from "jsonwebtoken";
 import { authOptions } from "../../../../../../lib/nextAuth";
 
 // DELETE user by ID
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
+  const { id } = await params;
 
   const token = jwt.sign(
     { email: session.user.email },
@@ -19,7 +21,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   try {
     const backendUrl = process.env.BACKEND_URL;
-    const response = await axios.delete(`${backendUrl}/users/${params.id}`, {
+    const response = await axios.delete(`${backendUrl}/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return NextResponse.json(response.data, { status: response.status });
