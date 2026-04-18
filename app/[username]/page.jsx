@@ -2,10 +2,11 @@ import React from 'react'
 import GetUserByUsername from './GetUserByUsername';
 
 
-function page({params}) {
+async function page({params}) {
+  const { username } = await params;
   return (
     <div>
-      <GetUserByUsername params={params} />
+      <GetUserByUsername params={{ username }} />
     </div>
   )
 }

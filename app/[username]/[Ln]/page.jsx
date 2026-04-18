@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import {
@@ -27,6 +27,7 @@ import ParticleComponent from "../../Components/ParticleComponent";
 import AccountNotFound from "../../Components/AccountNotFound";
 
 function Page({ params }) {
+  const { username, Ln } = use(params);
   const { data: session, status } = useSession();
   const router = useRouter()
   const path = usePathname();
@@ -40,7 +41,7 @@ function Page({ params }) {
   const [activeModule, setActiveModule] = useState(null);
 
   const filt = userDetails.find((fl) => fl.email === EmailUser);
-  const language = params.Ln;
+  const language = Ln;
   const symbols = {summary: "🔷",services: "💼",education: "🎓",
                     experience: "⭐",skills: "💡",languages: "🌍"
                   };
@@ -50,7 +51,7 @@ function Page({ params }) {
     const fetchUsers = async () => {
       setLoadingUsers(true); 
       try {
-        const res = await axios.get(`/api/proxy/users/${params.username}/${params.Ln}`);
+        const res = await axios.get(`/api/proxy/users/${username}/${Ln}`);
         setuserDetailsG(res.data.user);
         setUserLinks(res.data.links);
         setlabels(res.data.labels);
@@ -62,7 +63,7 @@ function Page({ params }) {
     };
 
     fetchUsers();
-  }, [SERVER_URL_V,params.Ln,params.username]);
+  }, [SERVER_URL_V,Ln,username]);
 
   const CopyLinkProfil = () => {
     const urlToCopy = `${CLIENT_URL}${path}`;
@@ -240,7 +241,7 @@ function Page({ params }) {
             <select
               className="bg-white border cursor-pointer border-gray-300 rounded-md p-1 text-sm shadow-sm w-full"
               value={language}
-              onChange={(e) => router.push(`/${params.username}/${e.target.value}`)}
+              onChange={(e) => router.push(`/${username}/${e.target.value}`)}
             >
               {languagess.map((lang) => (
                 <option key={lang.value} value={lang.value}>

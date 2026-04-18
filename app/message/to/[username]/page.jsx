@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import Image from "next/image";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { use, useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "../../../Components/toast";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -16,6 +16,7 @@ import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
 import ConfirmModal from "../../../Components/ConfirmModal";
 
 function UserProfile({ params }) {
+  const { username } = use(params);
   const [loading, setLoading] = useState(false);
   const [loadingu, setLoadingu] = useState(false);
   const [loadingd, setLoadingd] = useState(false);
@@ -30,7 +31,7 @@ function UserProfile({ params }) {
     friendRequests,loadingFriendRequests,loadingMessages}=useContext(MyContext);
   const filtUser = userDetails.find((fl) => fl.email === EmailUser);
   const router = useRouter();
-  const userDname = userDetails.find((user)=>user.username === params.username);
+  const userDname = userDetails.find((user)=>user.username === username);
 
 
 
@@ -184,7 +185,7 @@ function UserProfile({ params }) {
               {userDname ? (
                 <div className="flex items-center justify-between gap-4">
                   <Link
-                    href={`/${userDname.username}`}
+                    href={`/${username}`}
                     className="cursor-pointer hover:scale-105 duration-300 flex gap-2 items-center"
                   >
                     <Image
