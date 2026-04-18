@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Button } from "../../components/ui/button"
 import { ArrowLeft, LifeBuoy, User } from "lucide-react"
 import Link from "next/link"
 
@@ -84,21 +83,23 @@ export default function AccountNotFound() {
           We couldn't locate the account you're looking for. It may have been renamed or removed.
           </p>
           <div className="space-y-4">
-            <Button asChild className="w-full bg-[#00a896] hover:bg-[#008080] text-white py-2 px-4 rounded-md transition-all duration-300 transform hover:scale-105">
-              <Link href="/Home" className="flex items-center justify-center">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Return to Homepage
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full border-[#00a896] text-[#00a896] hover:bg-[#00a896] hover:text-white py-2 px-4 rounded-md transition-all duration-300">
-              <Link href="/Contact" className="flex items-center justify-center">
-                <LifeBuoy className="mr-2 h-4 w-4" /> Contact Support
-              </Link>
-            </Button>
+            <Link 
+              href="/Home" 
+              className="w-full bg-[#00a896] hover:bg-[#008080] text-white py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center font-bold"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" /> Return to Homepage
+            </Link>
+            <Link 
+              href="/Contact" 
+              className="w-full border-2 border-[#00a896] text-[#00a896] hover:bg-[#00a896] hover:text-white py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center font-bold"
+            >
+              <LifeBuoy className="mr-2 h-5 w-5" /> Contact Support
+            </Link>
           </div>
         </div>
       </main>
       <footer className="hidden bg-[#2a2e32] text-center py-4 text-gray-400 text-sm z-10">
-        <p>© 2024 LinkerFolio. All rights reserved.</p>
+        <p>© 2025 LinkerFolio. All rights reserved.</p>
       </footer>
     </div>
   )

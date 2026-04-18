@@ -3,11 +3,10 @@ import axios from "axios";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Button } from "../../../../components/ui/button";
-import { useToast } from "../../../../components/ui/use-toast";
+import { toast } from "../../../Components/toast";
 import { BsEmojiSmile } from "react-icons/bs";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
+import dynamic from "next/dynamic";
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../../../Context/MyContext";
 import { useRouter } from "next/navigation";
@@ -17,7 +16,6 @@ import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
 import ConfirmModal from "../../../Components/ConfirmModal";
 
 function UserProfile({ params }) {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [loadingu, setLoadingu] = useState(false);
   const [loadingd, setLoadingd] = useState(false);
@@ -43,43 +41,39 @@ function UserProfile({ params }) {
   }, [messages]);
 
   // Add Emoji to message input 
-  const addEmoji = (e) => {
-  const sym = e.unified.split("-");
-  const codeArray = sym.map((el) => "0x" + el);
-  const emoji = String.fromCodePoint(...codeArray);
+  const addEmoji = (emojiData) => {
+  const emojiStr = emojiData.emoji;
 
   if (putdelete) {
-    const input = document.getElementById("messageInput"); // أو استخدم ref
+    const input = document.getElementById("messageInput"); 
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
     const newText =
       messageInput.substring(0, start) +
-      emoji +
+      emojiStr +
       messageInput.substring(end);
 
     setMessageInput(newText);
 
-    // إعادة وضع المؤشر بعد الإيموجي
     setTimeout(() => {
-      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.selectionStart = input.selectionEnd = start + emojiStr.length;
       input.focus();
     }, 0);
   } else {
-    // نفس الشيء إذا كنت تستخدم uMessage
     const input = document.getElementById("uMessageInput");
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
     const newText =
       umessage.substring(0, start) +
-      emoji +
+      emojiStr +
       umessage.substring(end);
 
     setUMessage(newText);
 
     setTimeout(() => {
-      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.selectionStart = input.selectionEnd = start + emojiStr.length;
       input.focus();
     }, 0);
   }
@@ -121,14 +115,10 @@ function UserProfile({ params }) {
       socket.emit("deleteMessage", res.data);
     } catch (error) {
       console.error("Error deleting message:", error);
-      toast({
-        description: "Error deleting message. Please try again later.",
-        status: "error",
-      });
+      toast.error("Error deleting message. Please try again later.");
     } finally {
       setLoadingd(false);
       setIsConfirmOpen(false);
-
     }
   };
 
@@ -157,10 +147,7 @@ function UserProfile({ params }) {
       socket.emit("updateMessage", response.data);
     } catch (error) {
       console.error("Error updating message:", error);
-      toast({
-        description: "Error updating message. Please try again later.",
-        status: "error",
-      });
+      toast.error("Error updating message. Please try again later.");
     } finally {
       setLoadingu(false);
     }
@@ -277,7 +264,7 @@ function UserProfile({ params }) {
                         const DateMsg = new Date(msg.createdAt);
                         const DateUpdMsg = new Date(msg.updatedAt);
                         const DateToday = new Date();
-                        const filtUser = userDetails.find(
+                        const filtMsgFromUser = userDetails.find(
                           (fl) => fl.email === msg.from
                         );
                         // Date Message
@@ -309,17 +296,6 @@ function UserProfile({ params }) {
                         );
                         const YesterdayDate = `${yeary}/${monthy}/${dayy}`;
 
-                        // UPDATED MESSAGE DATE
-                        const yearu = DateUpdMsg.getFullYear();
-                        const monthu = String(
-                          DateUpdMsg.getMonth() + 1
-                        ).padStart(2, "0");
-                        const dayu = String(DateUpdMsg.getDate()).padStart(
-                          2,
-                          "0"
-                        );
-                        const UpdateDate = `${yearu}/${monthu}/${dayu}`;
-
                         return (
                           <div key={i}>
                             <div
@@ -331,7 +307,7 @@ function UserProfile({ params }) {
                             >
                               <div
                                 onClick={() =>
-                                  router.push(`/${filtUser?.username}`)
+                                  router.push(`/${filtMsgFromUser?.username}`)
                                 }
                                 className="flex-shrink-0"
                               >
@@ -377,7 +353,6 @@ function UserProfile({ params }) {
                           }`}
                             >
                               {msg.updated}
-                              {/* {msg.updated && `,${msg.updated && UpdateDate},${DateUpdMsg.toLocaleTimeString()}`} */}
                             </span>
                             <span
                               className={` flex gap-2 mb-1  ${
@@ -400,7 +375,7 @@ function UserProfile({ params }) {
                           </div>
                         );
                       })
-                  )}
+                   )}
                 </div>
                 {/* Input Messgage */}
                 <div
@@ -410,29 +385,28 @@ function UserProfile({ params }) {
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
                       id="messageInput"
-                      type="text"
                       placeholder="Enter your message here..."
                       value={messageInput}
                       maxLength={999}
                       onChange={(e) => {
                         setMessageInput(e.target.value);
                       }}
-                      className="flex-1 border-2 bg-white  border-gray-300 rounded-lg p-2  focus:outline-none transition duration-300"
+                      className="flex-1 border-2 bg-white border-gray-300 rounded-lg p-2 focus:outline-none transition duration-300"
                     />
-                    <Button
+                    <button
                       onClick={() => {
                         sendMessage();
                         setEmoji(emoji);
                       }}
                       disabled={loading || messageInput === ""}
-                      className="bg-indigo-600  text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300 disabled:bg-gray-400"
                     >
                       {loading ? (
                         <i className="fa fa-spinner fa-spin"></i>
                       ) : (
                         "Send"
                       )}
-                    </Button>
+                    </button>
                     <div
                       onClick={() => {
                         setEmoji(!emoji);
@@ -451,38 +425,33 @@ function UserProfile({ params }) {
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
                       id="uMessageInput"
-                      type="text"
                       placeholder="Enter your message here..."
                       value={umessage}
                       maxLength={999}
                       onChange={(e) => {
                         setUMessage(e.target.value);
                       }}
-                      className="flex-1 border-2 bg-white  border-gray-300 rounded-lg p-2  focus:outline-none transition duration-300"
+                      className="flex-1 border-2 bg-white border-gray-300 rounded-lg p-2 focus:outline-none transition duration-300"
                     />
                     <button
                       onClick={updateMsg}
-                      className="bg-green-600 p-2 rounded-md  text-white hover:bg-green-600 hover:scale-105 duration-500"
+                      className="bg-green-600 p-2 rounded-md text-white hover:bg-green-700 hover:scale-105 duration-500 min-w-[80px]"
                     >
-                      <>
-                        {loadingu ? (
-                          <i className="fa fa-spinner fa-spin"></i>
-                        ) : (
-                          "Update"
-                        )}
-                      </>
+                      {loadingu ? (
+                        <i className="fa fa-spinner fa-spin"></i>
+                      ) : (
+                        "Update"
+                      )}
                     </button>
                     <button
                       onClick={()=>setIsConfirmOpen(true)}
-                      className="bg-red-600 p-2 rounded-md  text-white hover:bg-red-600 hover:scale-105 duration-500"
+                      className="bg-red-600 p-2 rounded-md text-white hover:bg-red-700 hover:scale-105 duration-500 min-w-[80px]"
                     >
-                      <>
-                        {loadingd ? (
-                          <i className="fa fa-spinner fa-spin"></i>
-                        ) : (
-                          "Delete"
-                        )}
-                      </>
+                      {loadingd ? (
+                        <i className="fa fa-spinner fa-spin"></i>
+                      ) : (
+                        "Delete"
+                      )}
                     </button>
                     <div
                       onClick={() => {
@@ -504,7 +473,7 @@ function UserProfile({ params }) {
             onCancel={() => setIsConfirmOpen(false)}
           />  
           <div className={` absolute right-4 ${emoji ? "hidden" : "block"}`}>
-            <Picker data={data} onEmojiSelect={addEmoji} maxFrequentRows={0} />
+            <EmojiPicker onEmojiClick={addEmoji} />
           </div>
         </div>
       </div>

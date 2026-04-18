@@ -3,7 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import {Link, X, Edit3, Trash2, CheckCircle } from 'lucide-react';
 import { MyContext } from '../Context/MyContext';
 import axios from 'axios';
-import { toast } from "react-toastify";
+import { toast } from "../Components/toast";
 import CreateProfile from '../Components/CreateProfile';
 import LoadChatPage from '../Components/Loading/LoadChatPage';
 import ParticleComponent  from "../Components/ParticleComponent"
@@ -77,12 +77,7 @@ function EditUserLinks() {
       setUserLinks(prevLinks => 
         prevLinks.map(item => (item._id === editLinkId ? response.data.data : item))
       );
-      toast(
-      <p className="flex gap-3 items-center">
-        <CheckCircle /> Updated Successfully
-      </p>,
-      { autoClose: 3000 }
-    );
+      toast("Updated Successfully");
       setEditLinkId(null);
       setLink('');
       setNamelink('');

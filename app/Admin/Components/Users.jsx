@@ -5,7 +5,7 @@ import { CircleUser } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "../../Components/toast";
 
 function Users() {
   const { userDetails} = useContext(MyContext);

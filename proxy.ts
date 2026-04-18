@@ -2,8 +2,8 @@ import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Middleware function
-export default withAuth(async function middleware(request: NextRequest) {
+// Proxy function (formerly middleware)
+export default withAuth(async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAuth = await getToken({ req: request });
 
@@ -15,11 +15,6 @@ export default withAuth(async function middleware(request: NextRequest) {
   if (!isAuth && isProtectedRoute) {
     return NextResponse.redirect(new URL('/', request.url));
   }
-
-  // If authenticated and accessing non-auth route
-  // if (!isAuthRoute && isAuth) {
-  //   return NextResponse.redirect(new URL('/Profile', request.url));
-  // }
 }, {
   // Optional callback function
   callbacks: {
@@ -33,18 +28,3 @@ export default withAuth(async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/Home','/message/:path*','/BusinessLinks', '/Profile/:path*', '/Contact', '/auth/:path*'],
 };
-
-  
-
-// import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
-// const isProctedRoutes = createRouteMatcher(["/","/Profile/(.*)","/message/(.*)"])
-// export default clerkMiddleware((auth,req)=>{
-//   if(isProctedRoutes(req)){
-//     auth().protect()
-//   }
-// });
-
-// export const config = {
-//   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
-// };

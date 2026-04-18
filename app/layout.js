@@ -1,23 +1,18 @@
-import { Inter, Prompt } from "next/font/google";
+import { Prompt } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Components/Navbar";
-import { Toaster } from "../components/ui/sonner"
 import { MyProvider } from "./Context/MyContext";
-import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastProvider } from "./Components/toast";
 import NextAuthProvider from "./providers/NextAuthProvider";
 import {Metadata} from "./data/metadata"
 import { Analytics } from "@vercel/analytics/react"
 
-const inter = Inter({ subsets: ['latin'] });
 const prompt = Prompt({ subsets: ['latin'], weight: '400' });
 
 export const metadata = Metadata ;
 export const viewport = {
   width: 'device-width',
   initialScale: 0.9,
-  // maximumScale: 1,
-  // userScalable: false,
 };
 
 export default function RootLayout({ children }) {
@@ -31,14 +26,14 @@ export default function RootLayout({ children }) {
         <body className={`${prompt.className} min-h-screen scrollbar-none bg-gray-800 g-gradient-to-r from-blue-500 to-purple-500`}>
         <NextAuthProvider>
           <MyProvider>
-            <div className="sticky top-0 z-50 ">
-          <Navbar />
-          </div>
-            {children}
+            <ToastProvider>
+                <div className="sticky top-0 z-50 ">
+                    <Navbar />
+                </div>
+                {children}
+            </ToastProvider>
         </MyProvider>
         </NextAuthProvider>
-          <Toaster />
-          <ToastContainer />
         <Analytics />
         </body>
       </html>

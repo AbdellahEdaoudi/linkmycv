@@ -2,11 +2,10 @@ import axios from "axios";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Button } from "../../components/ui/button";
-import { useToast } from "../../components/ui/use-toast";
+import { toast } from "./toast";
 import { BsEmojiSmile } from "react-icons/bs";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
+import dynamic from "next/dynamic";
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import { EllipsisVertical } from "lucide-react";
 import { MyContext } from "../Context/MyContext";
 import { useRouter } from "next/navigation";
@@ -15,7 +14,6 @@ import InputLoadMessages from "./Loading/InputLoadMessages";
 import ConfirmModal from "./ConfirmModal";
 
 function Messages({ selectedUser }) {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [loadingu, setLoadingu] = useState(false);
   const [loadingd, setLoadingd] = useState(false);
@@ -40,43 +38,39 @@ function Messages({ selectedUser }) {
     }
   }, [messages, selectedUser]);
   // Add Emoji to message input
-  const addEmoji = (e) => {
-  const sym = e.unified.split("-");
-  const codeArray = sym.map((el) => "0x" + el);
-  const emoji = String.fromCodePoint(...codeArray);
+  const addEmoji = (emojiData) => {
+  const emojiStr = emojiData.emoji;
 
   if (putdelete) {
-    const input = document.getElementById("messageInput"); // أو استخدم ref
+    const input = document.getElementById("messageInput"); 
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
     const newText =
       messageInput.substring(0, start) +
-      emoji +
+      emojiStr +
       messageInput.substring(end);
 
     setMessageInput(newText);
 
-    // إعادة وضع المؤشر بعد الإيموجي
     setTimeout(() => {
-      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.selectionStart = input.selectionEnd = start + emojiStr.length;
       input.focus();
     }, 0);
   } else {
-    // نفس الشيء إذا كنت تستخدم uMessage
     const input = document.getElementById("uMessageInput");
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
     const newText =
       umessage.substring(0, start) +
-      emoji +
+      emojiStr +
       umessage.substring(end);
 
     setUMessage(newText);
 
     setTimeout(() => {
-      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.selectionStart = input.selectionEnd = start + emojiStr.length;
       input.focus();
     }, 0);
   }
@@ -118,10 +112,7 @@ function Messages({ selectedUser }) {
     socket.emit("deleteMessage", res.data);
   } catch (error) {
     console.error("Error deleting message:", error);
-    toast({
-      description: "Error deleting message. Please try again later.",
-      status: "error",
-    });
+    toast.error("Error deleting message. Please try again later.");
   } finally {
     setLoadingd(false);
     setIsConfirmOpen(false);
@@ -153,10 +144,7 @@ function Messages({ selectedUser }) {
       socket.emit("updateMessage", response.data);
     } catch (error) {
       console.error("Error updating message:", error);
-      toast({
-        description: "Error updating message. Please try again later.",
-        status: "error",
-      });
+      toast.error("Error updating message. Please try again later.");
     } finally {
       setLoadingu(false);
     }
@@ -180,7 +168,7 @@ function Messages({ selectedUser }) {
   const CopiedMessages = (e, message) => {
     e.preventDefault();
     navigator.clipboard.writeText(message).then(() => {
-      toast("Message copied!");
+      toast.info("Message copied!");
     });
   };
 
@@ -199,8 +187,8 @@ function Messages({ selectedUser }) {
               >
                 <div className="w-12 h-12 border-2 border-green-500 rounded-full flex-shrink-0 overflow-hidden">
                   <Image
-                    width={96} // 24 * 4
-                    height={96} // 24 * 4
+                    width={96} 
+                    height={96} 
                     src={selectedUser?.urlimage}
                     alt="Profile Image"
                     className="object-cover"
@@ -250,12 +238,12 @@ function Messages({ selectedUser }) {
             ) : (
               <div>
                 <div
-                  className="bg-gray-100 p-4 rounded-lg  shadow-lg h-[600vh] duration-300
+                  className="bg-gray-100 p-4 rounded-lg shadow-lg h-[600vh] duration-300
               sm:h-[59.7vh] md:h-[60vh] scrollbar-none overflow-y-auto"
                   ref={messagesEndRef}
                 >
                   {FilterMessages.length === 0 ? (
-                    <div className="flex items-center justify-center h-64   rounded-lg">
+                    <div className="flex items-center justify-center h-64 rounded-lg">
                       <div className="text-center p-4">
                         <h2 className="text-xl font-semibold text-gray-700 mb-2">
                           No Messages
@@ -270,7 +258,7 @@ function Messages({ selectedUser }) {
                       const DateMsg = new Date(msg.createdAt);
                       const DateUpdMsg = new Date(msg.updatedAt);
                       const DateToday = new Date();
-                      const filtUser = userDetails.find(
+                      const filtMsgFromUser = userDetails.find(
                         (fl) => fl.email === msg.from
                       );
                       // Date Message
@@ -289,12 +277,6 @@ function Messages({ selectedUser }) {
                       const dayy = String(DateToday.getDate() - 1).padStart(2,"0");
                       const YesterdayDate = `${yeary}/${monthy}/${dayy}`;
 
-                      // UPDATED MESSAGE DATE
-                      const yearu = DateUpdMsg.getFullYear();
-                      const monthu = String(DateUpdMsg.getMonth() + 1).padStart(2,"0");
-                      const dayu = String(DateUpdMsg.getDate()).padStart(2,"0");
-                      const UpdateDate = `${yearu}/${monthu}/${dayu}`;
-
                       return (
                         <div key={i}>
                           <div
@@ -308,7 +290,7 @@ function Messages({ selectedUser }) {
                             <div
                               className="flex-shrink-0"
                               onClick={() =>
-                                router.push(`/${filtUser?.username}`)
+                                router.push(`/${filtMsgFromUser?.username}`)
                               }
                             >
                               <Image
@@ -324,7 +306,7 @@ function Messages({ selectedUser }) {
                               onContextMenu={(e) =>
                                 CopiedMessages(e, msg.message)
                               }
-                              className={`whitespace-pre-wrap break-all overflow-y-auto max-h-44  ${
+                              className={`whitespace-pre-wrap break-all overflow-y-auto max-h-44 ${
                                 (msg.from || msg.to) === EmailUser
                                   ? "bg-gradient-to-r from-sky-400 to-blue-500"
                                   : "bg-gradient-to-r from-green-400 to-teal-500"
@@ -359,7 +341,6 @@ function Messages({ selectedUser }) {
                           }`}
                           >
                             {msg.updated}
-                            {/* {msg.updated && `,${msg.updated && UpdateDate},${DateUpdMsg.toLocaleTimeString()}`} */}
                           </div>
                           {/* DateMsg */}
                           <div
@@ -392,29 +373,28 @@ function Messages({ selectedUser }) {
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
                       id="messageInput"
-                      type="text"
                       placeholder="Enter your message here..."
                       value={messageInput}
                       maxLength={999}
                       onChange={(e) => {
                         setMessageInput(e.target.value);
                       }}
-                      className="flex-1 border-2 bg-white  border-gray-300 rounded-lg p-2  focus:outline-none transition duration-300"
+                      className="flex-1 border-2 bg-white border-gray-300 rounded-lg p-2 focus:outline-none transition duration-300"
                     />
-                    <Button
+                    <button
                       onClick={() => {
                         sendMessage();
                         setEmoji(emoji);
                       }}
                       disabled={loading || messageInput === ""}
-                      className="bg-indigo-600  text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300 disabled:bg-gray-400"
                     >
                       {loading ? (
                         <i className="fa fa-spinner fa-spin"></i>
                       ) : (
                         "Send"
                       )}
-                    </Button>
+                    </button>
                     <div
                       onClick={() => {
                         setEmoji(!emoji);
@@ -433,38 +413,33 @@ function Messages({ selectedUser }) {
                   <div className="flex items-center gap-4 pr-2 ">
                     <textarea
                       id="uMessageInput"
-                      type="text"
                       placeholder="Enter your message here..."
                       value={umessage}
                       maxLength={999}
                       onChange={(e) => {
                         setUMessage(e.target.value);
                       }}
-                      className="flex-1 border-2 bg-white  border-gray-300 rounded-lg p-2  focus:outline-none transition duration-300"
+                      className="flex-1 border-2 bg-white border-gray-300 rounded-lg p-2 focus:outline-none transition duration-300"
                     />
                     <button
                       onClick={updateMsg}
-                      className="bg-green-600 p-2 rounded-md  text-white hover:bg-green-600 hover:scale-105 duration-500"
+                      className="bg-green-600 p-2 rounded-md text-white hover:bg-green-700 hover:scale-105 duration-500 min-w-[80px]"
                     >
-                      <>
-                        {loadingu ? (
-                          <i className="fa fa-spinner fa-spin"></i>
-                        ) : (
-                          "Update"
-                        )}
-                      </>
+                      {loadingu ? (
+                        <i className="fa fa-spinner fa-spin"></i>
+                      ) : (
+                        "Update"
+                      )}
                     </button>
                     <button
                       onClick={() => setIsConfirmOpen(true)}
-                      className="bg-red-600 p-2 rounded-md  text-white hover:bg-red-600 hover:scale-105 duration-500"
+                      className="bg-red-600 p-2 rounded-md text-white hover:bg-red-700 hover:scale-105 duration-500 min-w-[80px]"
                     >
-                      <>
-                        {loadingd ? (
-                          <i className="fa fa-spinner fa-spin"></i>
-                        ) : (
-                          "Delete"
-                        )}
-                      </>
+                      {loadingd ? (
+                        <i className="fa fa-spinner fa-spin"></i>
+                      ) : (
+                        "Delete"
+                      )}
                     </button>
                     <div
                       onClick={() => {
@@ -488,7 +463,7 @@ function Messages({ selectedUser }) {
         />  
         {/* Emojes */}
         <div className={` absolute right-4 ${emoji ? "hidden" : "block"}`}>
-          <Picker data={data} onEmojiSelect={addEmoji} maxFrequentRows={0} />
+          <EmojiPicker onEmojiClick={addEmoji} />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { MyContext } from "../../Context/MyContext";
 import Image from "next/image";
-import { toast } from "react-toastify";
+import { toast } from "../toast";
 import { useRouter } from "next/navigation";
 import { UserX } from "lucide-react";
 import ConfirmModal from "../ConfirmModal";

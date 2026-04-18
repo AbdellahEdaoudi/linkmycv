@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { MyContext } from "../Context/MyContext";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "../Components/toast";
 import Image from "next/image";
 import io from "socket.io-client";
 import { set } from "lodash";
