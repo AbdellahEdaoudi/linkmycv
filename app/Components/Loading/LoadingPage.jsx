@@ -19,12 +19,8 @@ function Loadingpage() {
            <div className=" border flex flex-col pb-6 md:flex-row md:items-start items-center mb-4 p-4 bg-white rounded-lg shadow-md">
            <div className="border-4  border-green-600 shadow-lg  rounded-full overflow-hidden mb-4 md:mb-0 md:mr-6 duration-500">
                    <div
-                     width={140}
-                     height={0}
-                     src={"/prifil Loading.png"}
-                     alt="Profile Image"
-                     className="object-cover bg-gray-300 animate-pulse w-32 h-32  cursor-pointer"
-                     />
+                     className="object-cover bg-gray-300 animate-pulse w-32 h-32 cursor-pointer"
+                   />
                      </div>
                <div className="flex flex-col md:items-start items-center justify-center">
                  <h1 className="font-bold text-2xl w-72 h-10 rounded-lg bg-gray-300 animate-pulse">

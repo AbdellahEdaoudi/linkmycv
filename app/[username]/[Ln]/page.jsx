@@ -133,14 +133,14 @@ function Page({ params }) {
               <Image
                 width={140}
                 height={140}
-                src={userDetailsG.urlimage}
+                src={userDetailsG.urlimage || "/prifil Loading.png"}
                 alt="Profile Image"
                 className="object-cover md:block sm:block hidden cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
               />
               <Image
                 width={100}
                 height={100}
-                src={userDetailsG.urlimage}
+                src={userDetailsG.urlimage || "/prifil Loading.png"}
                 alt="Profile Image"
                 className="object-cover md:hidden sm:hidden block cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
               />
@@ -158,7 +158,7 @@ function Page({ params }) {
                   <Image
                     width={400}
                     height={400}
-                    src={userDetailsG.urlimage}
+                    src={userDetailsG.urlimage || "/prifil Loading.png"}
                     alt="Profile Large"
                     className="object-cover rounded-xl shadow-inner max-w-full max-h-[80vh]"
                   />
