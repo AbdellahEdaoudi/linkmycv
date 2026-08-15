@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { MyContext } from "../Context/MyContext";
+import { MyContext } from "../context/MyContext";
 import { QrCode, X } from "lucide-react";
 
 function QrcodeProfile({ userDetailsG, path }) {

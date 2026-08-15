@@ -3,17 +3,17 @@ import axios from "axios";
 import Image from "next/image";
 import React, { use, useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { toast } from "../../../Components/toast";
+import { toast } from "../../../components/toast";
 import { BsEmojiSmile } from "react-icons/bs";
 import dynamic from "next/dynamic";
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import { EllipsisVertical } from "lucide-react";
-import { MyContext } from "../../../Context/MyContext";
+import { MyContext } from "../../../context/MyContext";
 import { useRouter } from "next/navigation";
-import { CustomLinkify } from "../../../Components/CustomLinkify";
-import LMessages from "../../../Components/Loading/LMessages";
-import InputLoadMessages from "../../../Components/Loading/InputLoadMessages";
-import ConfirmModal from "../../../Components/ConfirmModal";
+import { CustomLinkify } from "../../../components/CustomLinkify";
+import LMessages from "../../../components/Loading/LMessages";
+import InputLoadMessages from "../../../components/Loading/InputLoadMessages";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 function UserProfile({ params }) {
   const { username } = use(params);
@@ -191,7 +191,7 @@ function UserProfile({ params }) {
                     <Image
                       src={userDname.urlimage}
                       alt="Profile"
-                      className="rounded-full"
+                      className="w-12 h-12 min-w-[48px] aspect-square object-cover rounded-full"
                       width={48}
                       height={48}
                     />

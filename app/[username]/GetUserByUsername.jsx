@@ -10,19 +10,19 @@ import {
   Phone,
   X,
 } from "lucide-react";
-import { toast } from "../Components/toast";
-import { MyContext } from "../Context/MyContext";
+import { toast } from "../components/toast";
+import { MyContext } from "../context/MyContext";
 import UserLinks from "./UserLinks";
-import Loadingpage from "../Components/Loading/LoadingPage";
+import Loadingpage from "../components/Loading/LoadingPage";
 import FriendRequest from "./FriendRequest";
-import SignInComponents from "../Components/SignIn/SignInComponents";
-import SignInComponents_CP from "../Components/SignIn/SignInComponents_CP";
+import SignInComponents from "../components/SignIn/SignInComponents";
+import SignInComponents_CP from "../components/SignIn/SignInComponents_CP";
 import QrcodeProfile from "./QrcodeProfile";
 import { languagess } from "../data/language";
 import { signIn, useSession } from "next-auth/react";
 import SocialMedia from "./SocialMedia"
-import AccountNotFound from '../Components/AccountNotFound'
-import ParticleComponent from "../Components/ParticleComponent";
+import AccountNotFound from '../components/AccountNotFound'
+import ParticleComponent from "../components/ParticleComponent";
 import axios from "axios";
 
 function GetUserByUsername({ params }) {
@@ -131,14 +131,14 @@ function GetUserByUsername({ params }) {
                 height={140}
                 src={userDetailsG.urlimage || "/prifil Loading.png"}
                 alt="Profile Image"
-                className="object-cover md:block sm:block hidden cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
+                className="w-[140px] h-[140px] min-w-[140px] aspect-square object-cover md:block sm:block hidden cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
               />
               <Image
                 width={100}
                 height={100}
                 src={userDetailsG.urlimage || "/prifil Loading.png"}
                 alt="Profile Image"
-                className="object-cover md:hidden sm:hidden block cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
+                className="w-[100px] h-[100px] min-w-[100px] aspect-square object-cover md:hidden sm:hidden block cursor-pointer border-4 border-green-600 shadow-lg rounded-full duration-500"
               />
             </div>
 

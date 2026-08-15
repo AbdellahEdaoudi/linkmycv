@@ -1,8 +1,8 @@
 import { Prompt } from "next/font/google";
 import "./globals.css";
-import Navbar from "./Components/Navbar";
-import { MyProvider } from "./Context/MyContext";
-import { ToastProvider } from "./Components/toast";
+import Navbar from "./components/Navbar";
+import { MyProvider } from "./context/MyContext";
+import { ToastProvider } from "./components/toast";
 import NextAuthProvider from "./providers/NextAuthProvider";
 import {Metadata} from "./data/metadata"
 import { Analytics } from "@vercel/analytics/react"

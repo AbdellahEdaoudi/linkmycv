@@ -9,9 +9,9 @@ import {
   UserMinus,
   UserPlus,
 } from "lucide-react";
-import { MyContext } from "../Context/MyContext";
+import { MyContext } from "../context/MyContext";
 import { useRouter } from "next/navigation";
-import { toast } from "../Components/toast";
+import { toast } from "../components/toast";
 import Image from "next/image";
 import io from "socket.io-client";
 import { set } from "lodash";
@@ -194,11 +194,11 @@ function FriendRequest({ emailuser, path, userDetailsG }) {
               <div className="flex flex-col items-center justify-center">
                 <div className="text-white text-2xl my-2">Friend requests</div>
                 <Image
-                  className="rounded-md"
+                  className="w-36 h-36 aspect-square object-cover rounded-xl border-2 border-white/20"
                   src={userDetailsG.urlimage}
                   width={150}
                   alt="Profile"
-                  height={100}
+                  height={150}
                 />
                 <div className="text-white text-3xl mt-4">
                   {userDetailsG.fullname}

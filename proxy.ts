@@ -7,7 +7,7 @@ export default withAuth(async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAuth = await getToken({ req: request });
 
-  const protectedRoutes = ['/Home','/message','/message/:path*', '/BusinessLinks', '/Profile', '/Contact',''];
+  const protectedRoutes = ['/home','/message','/message/:path*', '/businesslinks', '/profile', '/contact',''];
   const isAuthRoute = pathname.startsWith('/auth');
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
@@ -26,5 +26,5 @@ export default withAuth(async function proxy(request: NextRequest) {
 
 // Configuration for matcher
 export const config = {
-  matcher: ['/Home','/message/:path*','/BusinessLinks', '/Profile/:path*', '/Contact', '/auth/:path*'],
+  matcher: ['/home','/message/:path*','/businesslinks', '/profile/:path*', '/contact', '/auth/:path*'],
 };
