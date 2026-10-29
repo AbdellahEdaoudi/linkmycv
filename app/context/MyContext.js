@@ -1,158 +1,53 @@
-"use client"
-import axios from 'axios';
-import { useSession } from 'next-auth/react';
-import { createContext, useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
+"use client";
+import { createContext, useEffect, useState } from 'react';
 
 export const MyContext = createContext();
 
 export const MyProvider = ({ children }) => {
-   const [userDetails, setUserDetails] = useState([]);
-   const [userLinks, setUserLinks] = useState([]);
-   const [messages, setMessages] = useState([]);
-   const [friendRequests, setFriendRequests] = useState([]);
-   const [socket, setSocket] = useState(null);
-   const {data,status} = useSession()
-   const EmailUser = data?.user?.email
-   const [previousNotificationCount, setPreviousNotificationCount] = useState(0);
-   const [previousfriendRequests, setPreviousfriendRequests] = useState(0);
-   const [loadingAll, setLoadingAll] = useState(false);
-   const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL ;
-   const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ;
-   const SERVER_URL_V = process.env.NEXT_PUBLIC_SERVER_URL_V ;
-   const audioRef = useRef(null);
-   
-  // socket.io
+  const [data, setData] = useState({});
+
   useEffect(() => {
-    const socket = io(SERVER_URL);
-    setSocket(socket);
-    
-    if (EmailUser) {
-      socket.emit('userConnected',EmailUser);
-    } else {
-      // console.error('User email is not available.');
-    }
+    const loadUser = () => {
+      if (typeof window !== "undefined") {
+        let loadedData = null;
+        try {
+          const username = localStorage.getItem("username");
+          if (username) {
+            const stored = localStorage.getItem(`data_${username}`);
+            if (stored) loadedData = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.error("Failed to parse data from localStorage", e);
+        }
 
-    socket.on("receiveMessage", (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
-    socket.on("receiveUpdatedMessage", (updatedMessage) => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg._id === updatedMessage._id ? updatedMessage : msg
-        )
-      );
-    });
-    socket.on("receiveDeletedMessage", (deletedMessageId) => {
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg._id !== deletedMessageId._id)
-      );
-    });
+        if (loadedData) {
+          setData(loadedData);
+        } else {
+          setData({});
+        }
+      }
+    };
 
-    socket.on("receiveFriendRequest", (newRequest) => {
-      setFriendRequests((prevRequests) => [...prevRequests, newRequest]);
-    });
-    socket.on("receiveUpdatedFriendRequest", (updatedRequest) => {
-      setFriendRequests((prevRequests) =>
-        prevRequests.map((request) =>
-          request._id === updatedRequest._id ? updatedRequest : request
-        )
-      );
-    });
-    socket.on("receiveDeletedFriendRequest", (deletedRequestId) => {
-      setFriendRequests((prevRequests) =>
-        prevRequests.filter((request) => request._id !== deletedRequestId)
-      );
-    });
+    loadUser();
+
+    window.addEventListener("auth-change", loadUser);
+    window.addEventListener("storage", loadUser);
 
     return () => {
-      socket.disconnect();
+      window.removeEventListener("auth-change", loadUser);
+      window.removeEventListener("storage", loadUser);
     };
-  }, [SERVER_URL,EmailUser]);
-  
-  // Fetch all data
-useEffect(() => {
-  const fetchAllData = async () => {
-    try {
-      setLoadingAll(true);
-      const res = await axios.get(`/api/proxy/alldata`);
-      const data = res.data;
-      if (data.success) {
-        setUserDetails(data.users || []);
-        setMessages(data.messages || []);
-        setFriendRequests(data.friends || []);
-        setUserLinks(data.links || []);
-      } else {
-        console.error("Failed to fetch data:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching all data:", error);
-    } finally {
-      setLoadingAll(false);
-    }
-  };
-
-  if (EmailUser) fetchAllData();
-}, [EmailUser]);
-
-
-
-  const latestNotifications = messages
-  .filter((fl) => fl.to === EmailUser && fl.from !== EmailUser && fl.readorno === false)
-  .reduce((acc, msg) => {
-    if (!acc[msg.from] || new Date(acc[msg.from].createdAt) < new Date(msg.createdAt)) {
-      acc[msg.from] = msg;
-    }
-    return acc;
-  }, {});
-
-const Notification = Object.values(latestNotifications);
-const Requests = friendRequests
-.filter(fl => fl.status === "pending" && fl.to === EmailUser) 
-.filter((fl, index, self) =>
-  index === self.findIndex((t) => (
-    t._id === fl._id 
-  ))
-);
-
-  useEffect(() => {
-    if (Notification.length > previousNotificationCount) {
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
-    }
-    setPreviousNotificationCount(Notification.length);
-  }, [Notification.length, previousNotificationCount]);
-  
-  useEffect(() => {
-    if (Requests.length > previousfriendRequests) {
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
-    }
-    setPreviousfriendRequests(Requests.length);
-  }, [Requests.length, previousfriendRequests]);
+  }, []);
 
   return (
     <MyContext.Provider
       value={{
-        CLIENT_URL,
-        SERVER_URL,
-        userDetails,
-        setUserDetails,
-        userLinks,
-        setUserLinks,
-        EmailUser,
-        Notification,
-        SERVER_URL_V,
-        messages,
-        setMessages,
-        socket,
-        friendRequests, setFriendRequests,
-        Requests,loadingAll
+        data,
+        setData,
+        CLIENT_URL: process.env.NEXT_PUBLIC_CLIENT_URL,
+        SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
       }}
     >
-      <audio ref={audioRef} src="/notification3.mp3" preload="auto" />
       {children}
     </MyContext.Provider>
   );

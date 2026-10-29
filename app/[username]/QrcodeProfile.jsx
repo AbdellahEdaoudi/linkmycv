@@ -1,160 +1,249 @@
-import React, { useContext, useRef, useState } from "react";
+"use client";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import { MyContext } from "../context/MyContext";
-import { QrCode, X } from "lucide-react";
+import {
+  QrCode,
+  X,
+  Download,
+  Share2,
+  Link as LinkIcon,
+  CheckCheck,
+} from "../components/lucide-react";
+import { toast } from "../components/toast";
 
-function QrcodeProfile({ userDetailsG, path }) {
-  const { CLIENT_URL } = useContext(MyContext);
+export default function QrcodeProfile({ userData, path, btnClassName }) {
+  const user = userData || {};
+  const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL || "";
   const qrCodeRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const DownloadQRCode = () => {
-    if (qrCodeRef.current) {
-      const canvas = qrCodeRef.current.querySelector("canvas");
-      if (canvas) {
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = `${userDetailsG.fullname}.Linkerfolio.png`;
-        link.click();
-      }
+  useEffect(() => setMounted(true), []);
+
+  const displayName = user?.fullname || "Your profile";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+
+  const getFullUrl = () =>
+    `${CLIENT_URL || (typeof window !== "undefined" ? window.location.origin : "")}${path}`;
+
+  // Close on Escape + lock page scroll while the modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => e.key === "Escape" && setIsOpen(false);
+    const prevOverflow = document.body.style.overflow;
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
+
+  const getCanvas = () => qrCodeRef.current?.querySelector("canvas");
+
+  const downloadQRCode = () => {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = `${user?.username || "profile"}-linkmycv-QR.png`;
+    link.click();
+    toast?.success?.("QR code downloaded");
+  };
+
+  const copyLink = async () => {
+    const url = getFullUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast?.success?.("Profile link copied");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast?.error?.("Couldn't copy the link. Copy it manually from the field.");
     }
   };
 
-  const ShareQRCode = () => {
-    if (navigator.share && qrCodeRef.current) {
-      const canvas = qrCodeRef.current.querySelector("canvas");
-      if (canvas) {
-        canvas.toBlob((blob) => {
-          const file = new File(
-            [blob],
-            `${userDetailsG.username}.Linkerfolio.png`,
-            { type: "image/png" }
-          );
-          navigator
-            .share({
-              files: [file],
-              title: "QR Code",
-              text: "Check out this QR Code!",
-            })
-            .catch((error) => console.error("Sharing failed", error));
+  const shareQRCode = () => {
+    const canvas = getCanvas();
+    const url = getFullUrl();
+    const shareText = `Check out ${user?.fullname || "my"}'s CV and portfolio on linkmycv`;
+
+    if (!navigator.share) return downloadQRCode();
+
+    if (canvas) {
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], `${user?.username || "profile"}-linkmycv.png`, {
+          type: "image/png",
         });
-      }
-    } else {
-      alert("Your browser doesn't support the Web Share API.");
+        const payload = { files: [file], title: displayName, text: shareText };
+        if (navigator.canShare?.(payload)) {
+          navigator.share(payload).catch(() => {});
+        } else {
+          navigator.share({ title: displayName, text: shareText, url }).catch(() => {});
+        }
+      });
     }
   };
 
-  const ShareLink = () => {
-    const url = `${CLIENT_URL}${path}`;
-
-    if (navigator.share) {
-      navigator
-        .share({
-          url: url,
-        })
-        .then(() => console.log("Successful share"))
-        .catch((error) => console.log("Error sharing", error));
-    } else {
-      alert("Share not supported on this browser");
-    }
+  const qrProps = {
+    value: getFullUrl(),
+    bgColor: "#ffffff",
+    fgColor: "#1b1536",
+    includeMargin: false,
+    level: "H",
   };
 
   return (
     <div>
-      <span 
+      <button
         onClick={() => setIsOpen(true)}
-        className="flex gap-2 border p-2 rounded-full w-10 cursor-pointer hover:text-red-700 hover:scale-110 duration-200"
+        title="View QR code"
+        aria-label="View QR code"
+        className={
+          btnClassName ||
+          "rounded-full hover:scale-110 flex items-center justify-center hover:bg-violet-50 border border-gray-200 h-9 w-9 transition duration-300 bg-white shadow-sm text-gray-600 hover:text-violet-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        }
       >
-        <QrCode />
-      </span>
+        <QrCode size={14} />
+      </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden relative shadow-2xl animate-in zoom-in-95 duration-300">
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <X size={24} />
-            </button>
-            
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">QR Code Profile</h2>
-              
-              <div className="flex flex-col justify-center items-center">
-                <div className={`mb-6 hidden`} ref={qrCodeRef}>
-                  <QRCodeCanvas
-                    value={`${CLIENT_URL}${path}`}
-                    size={500}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    renderAs="canvas"
-                    includeMargin={true}
-                    level="H"
-                    imageSettings={{
-                      src: "/LinkefolioLogo.png",
-                      height: 80,
-                      width: 80,
-                      excavate: true,
-                    }}
-                  />
-                </div>
-                
-                <div className="bg-white p-4 rounded-xl shadow-inner mb-6">
-                  <QRCodeCanvas
-                    id="qrcode"
-                    value={`${CLIENT_URL}${path}`}
-                    size={200}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    renderAs="canvas"
-                    includeMargin={true}
-                    level="H"
-                    imageSettings={{
-                      src: "/LinkefolioLogo.png",
-                      height: 50,
-                      width: 50,
-                      excavate: true,
-                    }}
-                  />
-                </div>
+      {isOpen && mounted && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Profile QR code"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-[#120d28]/70 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-[380px] bg-white rounded-[28px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Hidden high-res canvas used for download / share */}
+            <div className="hidden" ref={qrCodeRef}>
+              <QRCodeCanvas
+                {...qrProps}
+                size={900}
+                marginSize={4}
+                imageSettings={{
+                  src: "/mycvlink-logo.png",
+                  height: 130,
+                  width: 130,
+                  excavate: true,
+                }}
+              />
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-4">
-                  <button
-                    className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors duration-200"
-                    onClick={DownloadQRCode}
-                  >
-                    Download
-                  </button>
-                  <button
-                    className="p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium transition-colors duration-200"
-                    onClick={ShareQRCode}
-                  >
-                    Share QR
-                  </button>
-                  <button
-                    className="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors duration-200"
-                    onClick={ShareLink}
-                  >
-                    Link
-                  </button>
+            {/* Identity header */}
+            <div className="relative bg-[#1b1536] px-6 pt-6 pb-24 text-white">
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Close"
+                className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-3 pr-10">
+                <div className="h-11 w-11 shrink-0 rounded-full overflow-hidden bg-violet-500">
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={displayName}
+                      className="block w-full h-full object-cover object-top"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-sm font-bold tracking-wide text-white">
+                      {initials || <QrCode size={18} />}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base leading-tight truncate">
+                    {displayName}
+                  </h3>
+                  {user?.username && (
+                    <p className="text-sm text-white/55 truncate">@{user.username}</p>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="mt-8 flex justify-end">
+            {/* QR plate overlapping the header */}
+            <div className="relative -mt-[72px] px-6">
+              <div className="mx-auto w-fit rounded-3xl bg-white p-4 shadow-[0_12px_40px_-12px_rgba(27,21,54,0.45)] ring-1 ring-black/5">
+                <QRCodeCanvas
+                  {...qrProps}
+                  size={200}
+                  marginSize={1}
+                  className="block rounded-lg"
+                  imageSettings={{
+                    src: "/mycvlink-logo.png",
+                    height: 40,
+                    width: 40,
+                    excavate: true,
+                  }}
+                />
+              </div>
+              <p className="mt-4 text-center text-sm text-gray-500">
+                Scan with a phone camera to open this CV.
+              </p>
+            </div>
+
+            {/* Link + actions */}
+            <div className="px-6 pt-5 pb-6 space-y-3">
+              <div className="flex items-center gap-2 rounded-xl bg-[#f5f3fb] pl-3 pr-1.5 py-1.5">
+                <LinkIcon size={14} className="shrink-0 text-gray-400" />
+                <input
+                  readOnly
+                  value={getFullUrl()}
+                  onFocus={(e) => e.target.select()}
+                  aria-label="Profile link"
+                  className="min-w-0 flex-1 bg-transparent text-xs text-gray-700 font-mono truncate focus:outline-none"
+                />
                 <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-6 py-2 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={copyLink}
+                  className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                    copied
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-white text-gray-800 hover:bg-violet-50 shadow-sm"
+                  }`}
                 >
-                  Close
+                  {copied ? <CheckCheck size={14} /> : null}
+                  {copied ? "Copied" : "Copy link"}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={downloadQRCode}
+                  className="flex items-center justify-center gap-2 h-12 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                >
+                  <Download size={16} />
+                  Download PNG
+                </button>
+                <button
+                  onClick={shareQRCode}
+                  className="flex items-center justify-center gap-2 h-12 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 text-sm font-semibold transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                >
+                  <Share2 size={16} />
+                  Share
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
-}
-
-export default QrcodeProfile;
+} 

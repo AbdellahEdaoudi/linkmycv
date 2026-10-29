@@ -1,566 +1,320 @@
 "use client";
-import {
-  Bell,
-  BookUser,
-  LogOut,
-  MessageSquare,
-  MessagesSquare,
-  NotebookText,
-  Search,
-  Settings,
-  Shield,
-  UserRoundSearch,
-  Users,
-} from "lucide-react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { MyContext } from "../context/MyContext";
-import SignInWithGoogle from "./SignInWithGoogle";
 import axios from "axios";
-import FriendsReq from "./Friends/FriendsReq";
-import Friends from "./Friends/Friends";
-import DOMPurify from "dompurify";
-import Sent from "./Friends/Sent";
-import { signOut, useSession } from "next-auth/react";
+import {
+  LogOut,
+  MessageSquare,
+  Settings,
+  Shield,
+  LayoutDashboard,
+  ExternalLink,
+} from "./lucide-react";
+import { MyContext } from "../context/MyContext";
 
 function Navbar() {
-  const { data, status } = useSession();
-  const user = data?.user;
-  const [setting, setSetting] = useState(true);
-  const [notification, setNotification] = useState(true);
-  const [FrReq, setFrReq] = useState(true);
   const router = useRouter();
-  const [Adminfind, setAdminfind] = useState(false);
-  const [FR_FRREQ, setFR_FRREQ] = useState("Friend Requests");
+  const { data, setData } = useContext(MyContext);
+  const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "https://server-linkmycv.vercel.app";
+
+  const [user, setUser] = useState(null);
+  const [mounted, setMounted] = useState(false);
+  const [setting, setSetting] = useState(true);
   const navRef = useRef(null);
-  const {userDetails,Notification,EmailUser,Requests,
-    messages,setMessages,SERVER_URL_V,loadingAll} = useContext(MyContext);
-  const [search, setSearch] = useState(""); 
-  useEffect(() => {
-    const User = userDetails.find((user) => user.email === EmailUser);
-    if (User && User.email === "abdellahedaoudi80@gmail.com") {
-      setAdminfind(true);
-    }
-  }, [userDetails, EmailUser]);
 
-  
-  const ReadOrNo = async (fromEmail,toEmail) => {
+  // Read user from context or localStorage
+  const readUser = () => {
+    if (typeof window === "undefined") return null;
     try {
-      const response = await axios.put(`${SERVER_URL_V}/messages/readorno`, {
-        fromEmail,
-        toEmail,
-      },{
-        headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TOKEN}` 
+      const username = localStorage.getItem("username");
+      if (username) {
+        const stored = localStorage.getItem(`data_${username}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return parsed.user || parsed;
         }
-      });
-      const from = fromEmail
-      const to = toEmail
-      setMessages(prevMessages =>
-        prevMessages.map(message =>
-          message.from === from && message.to === to && message.readorno === false
-            ? { ...message, readorno: true }
-            : message
-        )
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Error updating readorno:",
-        error.response ? error.response.data : error.message
-      );
-      throw error;
+      }
+    } catch {
+      return null;
     }
+    return null;
   };
 
-  const FRS_FRREQ = () => {
-    switch (FR_FRREQ) {
-      case "Friend Requests":
-        return <FriendsReq />;
-      case "Friends":
-        return <Friends />;
-      case "Sent":
-        return <Sent />;
-      default:
-        return null; // Handle the default case
-    }
-  };
-const filteredUserDetails = userDetails
-  .filter(
-    (user) =>
-      user?.fullname?.toLowerCase().includes(search.toLowerCase()) ||
-      user?.email?.toLowerCase().includes(search.toLowerCase()) ||
-      user?.category?.toLowerCase().includes(search.toLowerCase()) ||
-      user?.username?.toLowerCase().includes(search.toLowerCase())
-  )
-  .slice();
-  // Shuffle the filtered results
-  const shuffleArray = (array) => {return array.sort(() => Math.random() - 0.5)};
-  const shuffledUserDetails = shuffleArray(filteredUserDetails);
-  const safeHighlightText = (text) => {
-    if (!search.trim()) return text;
-    const regex = new RegExp(`(${search.trim()})`, "gi");
-    const highlightedText = text.replace(regex, "<b>$1</b>");
-    return DOMPurify.sanitize(highlightedText);
-  };
-  // Click Outside to close menus
   useEffect(() => {
-    const ClickOutside = (event) => {
+    setMounted(true);
+
+    const currentUser = data?.user || readUser();
+    setUser(currentUser);
+    if (currentUser && !data?.user) {
+      setData((prev) => ({ ...prev, user: currentUser }));
+    }
+
+    const handleAuthSync = () => {
+      const u = readUser();
+      setUser(u);
+    };
+
+    window.addEventListener("auth-change", handleAuthSync);
+    window.addEventListener("storage", handleAuthSync);
+
+    return () => {
+      window.removeEventListener("auth-change", handleAuthSync);
+      window.removeEventListener("storage", handleAuthSync);
+    };
+  }, []);
+
+  // Keep in sync with context
+  useEffect(() => {
+    if (data?.user) {
+      setUser(data.user);
+    } else if (mounted) {
+      const u = readUser();
+      setUser(u);
+    }
+  }, [data?.user, mounted]);
+
+  // Click outside to close settings menu
+  useEffect(() => {
+    const clickOutside = (event) => {
       if (!navRef.current?.contains(event.target)) {
         setSetting(true);
-        setFrReq(true);
-        setNotification(true);
       }
     };
-    document.addEventListener('mousedown', ClickOutside);
-    return () => document.removeEventListener('mousedown', ClickOutside);
+    document.addEventListener("mousedown", clickOutside);
+    return () => document.removeEventListener("mousedown", clickOutside);
   }, []);
-  const filt = userDetails.filter((fl) => fl.email === EmailUser);
+
+  const Logout = async () => {
+    setSetting(true);
+    try {
+      await axios.post(`${SERVER_URL}/api/auth/logout`, {}, { withCredentials: true });
+    } catch {
+      // ignore
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("username");
+      window.dispatchEvent(new Event("auth-change"));
+    }
+    setData({});
+    setUser(null);
+    router.push("/auth/login");
+  };
+
   return (
-    <div ref={navRef}>
-      <nav className=" border-b drop-shadow-2xl bg-gray-200  backdrop-blur-lg ">
-        <section className="md:container md:mx-auto ml-3 mr-6 py-3">
-          <div className="flex justify-between items-center text-white">
+    <div ref={navRef} className="sticky top-0 z-40">
+      <nav className="border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xs">
+        <section className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 sm:py-4">
+          <div className="flex justify-between items-center">
             {/* LOGO */}
             <div
-              onClick={() => { router.push("/home"); setSetting(true); setFrReq(true); setNotification(true)}}
-              className="flex items-center flex-shrink-0 md:w-auto  hover:scale-105 duration-300 cursor-pointer">
-              <Image src="/favicon.png" alt="Logo" width={45} height={45} />
-              <Image src="/Logo.png" priority alt="Logo" width={160} height={70} className="md:block sm:block hidden w-auto h-auto"/>
+              onClick={() => {
+                router.push("/");
+                setSetting(true);
+              }}
+              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none shrink-0"
+            >
+              <Image
+                src="/mycvlink-logo.png"
+                alt="linkmycv Logo"
+                width={36}
+                height={36}
+                priority
+                className="w-[30px] h-[30px] sm:w-[38px] sm:h-[38px] object-contain"
+              />
+              <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+                link<span className="text-purple-600">mycv</span>
+              </span>
             </div>
-            {/* SEARCHE */}
-            <div className={`md:mx-0 mx-2 ${status === "unauthenticated" && "hidden"}`}>
-              <div className="flex items-center bg-gray-100 border shadow-sm border-gray-300 rounded-lg   md:w-96 max-w-md">
-                <div className=" p-2 text-gray-500 "><UserRoundSearch /></div>
-                <input type="search" placeholder="Search" onChange={(e) => {setSearch(e.target.value)}}
-                  className="bg-gray-100 text-black  p-2  rounded-lg focus:outline-none  focus:ring-blue-500 transition duration-300 w-full"/>
-              </div>
-            </div>
-             {/* USER PROFILE AND ICONS */}
+
+            {/* USER PROFILE & ACTIONS */}
             <div>
-              {(status === "authenticated" && !loadingAll) &&
-              filt.map((userr, i) => (
-                <div key={i} className="flex items-center gap-1">
-                  <div
-                    onClick={() => {
-                      setSetting(true);
-                      setNotification(true);
-                      setFrReq(true);
-                      router.push(`/${userr.username}`);
-                    }}
-                    className="font-medium  hidden mr-4 sm:hidden md:block text-black cursor-pointer hover:scale-105 transition duration-300"
+              {!mounted ? (
+                /* ── Navbar Actions Skeleton (Exact same height and width as authenticated state) ── */
+                <div className="flex items-center gap-1.5 sm:gap-3 animate-pulse">
+                  {/* Dashboard link skeleton */}
+                  <div className="h-[34px] w-[34px] sm:w-[110px] bg-slate-100 border border-slate-200/60 rounded-xl" />
+                  {/* User pill skeleton */}
+                  <div className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl border border-transparent">
+                    <div className="w-[34px] h-[34px] rounded-full bg-slate-200 border-2 border-purple-200 shrink-0" />
+                    <div className="hidden sm:flex flex-col gap-1 w-20">
+                      <div className="h-3 bg-slate-200 rounded w-full" />
+                      <div className="h-2 bg-slate-100 rounded w-2/3" />
+                    </div>
+                  </div>
+                  {/* Settings button skeleton */}
+                  <div className="w-[34px] h-[34px] rounded-xl bg-slate-100 border border-slate-200/80 shrink-0" />
+                </div>
+              ) : user ? (
+                /* ── Logged In User State ── */
+                <div className="flex items-center gap-1.5 sm:gap-3">
+                  {/* Dashboard Link */}
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition duration-200 shadow-2xs"
                   >
-                    <div className="flex items-center gap-2">
-                      <Image
-                        className="w-[35px] h-[35px] min-w-[35px] aspect-square object-cover rounded-full border-2 border-amber-400"
-                        src={userr.urlimage}
-                        width={35}
-                        height={35}
-                        alt="Photo Profile"
-                      />
-                      {userr.fullname}
+                    <LayoutDashboard size={15} />
+                    <span className="hidden xs:inline sm:inline">Dashboard</span>
+                  </Link>
+
+                  {/* View Live CV */}
+                  {user.username && (
+                    <Link
+                      href={`/${user.username}`}
+                      className="hidden md:inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl text-slate-700 hover:text-purple-600 hover:bg-slate-100 border border-slate-200/80 transition duration-200"
+                    >
+                      <span>Live CV</span>
+                      <ExternalLink size={14} className="text-slate-400" />
+                    </Link>
+                  )}
+
+                  {/* Contact Us (Available for logged-in users) */}
+                  <Link
+                    href="/contact"
+                    className="hidden lg:inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl text-slate-700 hover:text-purple-600 hover:bg-slate-100 border border-slate-200/80 transition duration-200"
+                  >
+                    <MessageSquare size={15} className="text-slate-500" />
+                    <span>Contact</span>
+                  </Link>
+
+                  {/* Admin Panel Link (if role === admin) */}
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition duration-200"
+                    >
+                      <Shield size={14} className="text-amber-600" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
+
+                  {/* User Profile Pill */}
+                  <div
+                    onClick={() => setSetting(!setting)}
+                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 cursor-pointer transition duration-200 border border-transparent hover:border-slate-200"
+                  >
+                    <Image
+                      className="w-[34px] h-[34px] min-w-[34px] aspect-square object-cover rounded-full border-2 border-purple-400"
+                      src={user.profileImage || user.urlimage || "/avatar.png"}
+                      width={34}
+                      height={34}
+                      alt={user.fullname || "Profile"}
+                    />
+                    <div className="hidden sm:flex flex-col text-left">
+                      <span className="font-semibold text-xs sm:text-sm text-slate-900 truncate max-w-[140px] leading-tight">
+                        {user.fullname}
+                      </span>
+                      {user.role === "admin" && (
+                        <span className="text-[9px] font-bold text-purple-600 uppercase tracking-wider leading-none mt-0.5">
+                          Admin
+                        </span>
+                      )}
                     </div>
                   </div>
-                  {/* Icons Navbar */}
-                  <div className="flex items-center gap-4">
-                    {/* Icon Notification */}
-                    <div
-                      onClick={() => {
-                        setNotification(!notification);
-                        setSearch("");
-                        setSetting(true);
-                        setFrReq(true);
-                      }}
-                      className="relative flex items-center"
-                    >
-                      <span className="text-black cursor-pointer  relative">
-                        <MessagesSquare />
-                      </span>
-                      <div
-                        onClick={() => {
-                          setNotification(!notification);
-                          setSetting(true);
-                        }}
-                        className=" w-6 h-4 text-[12px] flex cursor-pointer items-center justify-center absolute rounded-full bg-red-500 -right-1 -top-2"
-                      >
-                        {Notification.length
-                          ? Notification.length
-                          : Notification.length === 0
-                          ? "0"
-                          : "..."}
-                      </div>
-                    </div>
-                    {/* Icon FriendReq */}
-                    <div
-                      onClick={() => {
-                        setFrReq(!FrReq);
-                        setSearch("");
-                        setSetting(true);
-                        setNotification(true);
-                      }}
-                      className="relative flex items-center"
-                    >
-                      <span className="text-black cursor-pointer relative">
-                        <Users />
-                      </span>
-                      <div
-                        onClick={() => {
-                          setSetting(true), setNotification(true);
-                        }}
-                        className=" w-6 h-4 text-[12px] flex cursor-pointer items-center justify-center absolute rounded-full bg-red-500 -right-1 -top-2"
-                      >
-                        {Requests
-                          ? Requests.length
-                          : Requests.length === 0
-                          ? "0"
-                          : "..."}
-                      </div>
-                    </div>
-                    {/* Icon Settings */}
-                    <span
-                      onClick={() => {
-                        setSetting(!setting);
-                        setSearch("");
-                        setNotification(true);
-                        setFrReq(true);
-                      }}
-                      className="text-gray-800 hover:scale-105 duration-300 cursor-pointer"
-                    >
-                      <Settings />
-                    </span>
-                  </div>
+
+                  {/* Settings Trigger Icon */}
+                  <button
+                    onClick={() => setSetting(!setting)}
+                    title="Menu"
+                    className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition duration-200"
+                  >
+                    <Settings size={18} />
+                  </button>
                 </div>
-              ))}
-              {status === "unauthenticated" && <SignInWithGoogle />}
-              {(status === "loading" || loadingAll) && (
-              <div className={`${status === "unauthenticated" && "hidden"} flex md:flex-row flex-row-reverse items-center gap-2`}>
-                <div className="w-11 h-11 bg-gray-300 rounded-full"></div>
-                <div>
-                  <div className="md:w-40 w-16 h-4 bg-gray-300 rounded-md mb-1"></div>
-                  <div className="md:w-32 w-12 h-4 bg-gray-300 rounded-md"></div>
+              ) : (
+                /* ── Guest State (Not Logged In) ── */
+                /* Notice: No Contact link here because Registration is mandatory for Contact */
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => router.push("/auth/login")}
+                    className="text-slate-700 hover:text-purple-600 font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-xl hover:bg-slate-100 transition duration-150"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => router.push("/auth/register")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2 rounded-xl transition shadow-xs hover:shadow-md duration-150"
+                  >
+                    Register
+                  </button>
                 </div>
-              </div>
-               )}
+              )}
             </div>
           </div>
         </section>
       </nav>
-      {/* SETTING */}
-      <nav
-        onClick={() => {
-          setSetting(!setting);
-        }}
-        className={`overflow-hidden ${
-          !setting && "ring-2"
-        } transition-all duration-500 text-white bg-gray-800 rounded-md w-60 right-3 container absolute flex flex-col  ${
-          setting ? " max-h-0" : "max-h-80 p-4"
-        }`}
-      >
-        <Link
-          href={"/profile/update"}
-          onClick={() => {
-            setSetting(!setting);
-          }}
-          className="bg-gray-700 py-2 border-b flex items-center justify-center border-gray-600 hover:bg-gray-600 transition duration-300 rounded-sm hover:scale-105 text-center mb-2"
+
+      {/* ── SETTINGS DROPDOWN MENU ── */}
+      {!setting && user && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute right-4 sm:right-8 top-16 w-64 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-2.5 z-50 text-xs sm:text-sm text-slate-700 animate-in fade-in zoom-in-95 duration-150"
         >
-          <div className="flex items-center gap-1">
-            <BookUser /> Update Profile
+          {/* User Preview */}
+          <div className="px-3.5 py-2.5 border-b border-slate-100 mb-2">
+            <div className="flex items-center justify-between">
+              <p className="font-bold text-slate-900 truncate">{user.fullname}</p>
+              {user.role === "admin" && (
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 uppercase tracking-wide">
+                  Admin
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 truncate mt-0.5">@{user.username}</p>
           </div>
-        </Link>
-        <Link
-          href={"/businesslinks"}
-          onClick={() => {
-            setSetting(!setting);
-          }}
-          className="bg-gray-700 py-2 border-b flex items-center justify-center border-gray-600 hover:bg-gray-600 transition duration-300 rounded-sm hover:scale-105 text-center mb-2"
-        >
-          <div className="flex items-center gap-1">
-            <NotebookText /> Business Links
-          </div>
-        </Link>
-        <Link
-          href={"/Friends"}
-          onClick={() => {
-            setSetting(!setting);
-          }}
-          className="bg-gray-700 hidden py-2 border-b fle items-center justify-center border-gray-600 hover:bg-gray-600 transition duration-300 rounded-sm hover:scale-105 text-center mb-2"
-        >
-          <div className="flex items-center gap-1">
-            <Users /> Friends
-          </div>
-        </Link>
-        {Adminfind && (
+
           <Link
-            href={"/admin"}
-            onClick={() => {
-              setSetting(!setting);
-            }}
-            className="bg-gray-700 py-2 flex items-center justify-center border-b border-gray-600 hover:bg-gray-600 transition duration-300 rounded-sm hover:scale-105 text-center mb-2"
+            href="/dashboard"
+            onClick={() => setSetting(true)}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-purple-50 hover:text-purple-700 transition font-medium"
           >
-            <div className="flex items-center gap-1">
-              <Shield />
-              Admin
-            </div>
+            <LayoutDashboard size={16} className="text-purple-600" />
+            <span>Dashboard</span>
           </Link>
-        )}
 
-        <Link
-          href={"/contact"}
-          onClick={() => {
-            setSetting(!setting);
-          }}
-          className="bg-gray-700 flex items-center justify-center py-2 border-b border-gray-600 hover:bg-gray-600 transition duration-300 rounded-sm hover:scale-105 text-center mb-2"
-        >
-          <div className="flex items-center gap-1">
-            <MessageSquare /> Contact Us
-          </div>
-        </Link>
-        <div
-          onClick={() => {
-            signOut({
-              callbackUrl: "/",
-              redirect: true,
-            });
-          }}
-          className="bg-red-500 py-2 border-b cursor-pointer border-gray-600 hover:bg-red-600 transition duration-300 rounded-sm hover:scale-105 justify-center flex gap-2"
-        >
-          <LogOut />
-          Sign Out
-        </div>
-      </nav>
-      {/* notification */}
-      <nav
-        onClick={() => {
-          setNotification(!notification);
-        }}
-        className={`overflow-hidden ${
-          !notification && "ring-2"
-        } transition-all overflow-y-auto duration-500 text-white bg-gray-800 rounded-md md:w-96  shadow-lg  md:mx-auto   md:right-2 container absolute flex flex-col ${
-          notification ? "max-h-0" : "max-h-60 p-4"
-        }`}
-      >
-        {Notification.length > 0 ? (
-          Notification.map((nt, i) => {
-            const DateMsg = new Date(nt.createdAt);
-            const DateToday = new Date();
-
-            // Date Message
-            const year = DateMsg.getFullYear();
-            const month = String(DateMsg.getMonth() + 1).padStart(2, "0");
-            const day = String(DateMsg.getDate()).padStart(2, "0");
-            const DateAll = `${year}/${month}/${day}`;
-
-            // Date Today
-            const yeart = DateToday.getFullYear();
-            const montht = String(DateToday.getMonth() + 1).padStart(2, "0");
-            const dayt = String(DateToday.getDate()).padStart(2, "0");
-            const TodayDate = `${yeart}/${montht}/${dayt}`;
-
-            // Date Yesterday
-            const yeary = DateToday.getFullYear();
-            const monthy = String(DateToday.getMonth() + 1).padStart(2, "0");
-            const dayy = String(DateToday.getDate() - 1).padStart(2, "0");
-            const YesterdayDate = `${yeary}/${monthy}/${dayy}`;
-
-            // Determine display date
-            let displayDate = "";
-            if (DateAll === TodayDate) {
-              displayDate = "Today";
-            } else if (DateAll === YesterdayDate) {
-              displayDate = "Yesterday";
-            } else {
-              displayDate = DateAll;
-            }
-            const user = userDetails.find((user) => user.email === nt.from);
-            return (
-              <div
-                onClick={() => {
-                  localStorage.setItem('SelectedUser',JSON.stringify(user))
-                  router.push(`/home`);
-                  if (
-                    Notification.length > 0 &&
-                    Notification[0].readorno === false
-                  ) {
-                    ReadOrNo(nt.from, nt.to);
-                  }
-                }}
-                key={i}
-                className="flex cursor-pointer hover:scale-105 duration-300 items-center p-2 mb-2 bg-gray-700 rounded-md shadow-md"
-              >
-                <Image
-                  width={40}
-                  height={40}
-                  src={nt.fromimg}
-                  alt="Sender Image"
-                  className="w-10 h-10 min-w-[40px] aspect-square object-cover rounded-full mr-3"
-                />
-                <div>
-                  <nav className="flex gap-2 items-center">
-                    <h4 className="">{nt.from.split("@")[0]}</h4>
-                    <div className="flex gap-1 text-[10px]">
-                      <p className="text-gray-300">{displayDate}</p>
-                      <p className="text-gray-300">
-                        {DateMsg.toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </nav>
-                  <div className="flex items-center gap-1 text-sm">
-                    <p className="text-sm text-gray-400 font-bold line-clamp-1">
-                      {nt.message}
-                    </p>
-                    {/* <p className="text-gray-400">{`${NotificationCount.length === 1 ? "" : `(${NotificationCount.length})`}`}</p> */}
-                    <p className="text-gray-400">
-                      {Array.from(
-                        new Map(
-                          messages
-                            .filter(
-                              (fl) =>
-                                fl.to === EmailUser &&
-                                fl.from === nt.from &&
-                                fl.readorno === false
-                            )
-                            .map((item) => [item.message, item])
-                        ).values()
-                      ).length === 1
-                        ? ""
-                        : `(${
-                            Array.from(
-                              new Map(
-                                messages
-                                  .filter(
-                                    (fl) =>
-                                      fl.to === EmailUser &&
-                                      fl.from === nt.from &&
-                                      fl.readorno === false
-                                  )
-                                  .map((item) => [item.message, item])
-                              ).values()
-                            ).length
-                          })`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <p className="text-center text-sm text-gray-400">No Messages</p>
-        )}
-      </nav>
-      {/* FrReq */}
-      <nav
-        className={`overflow-hidden ${
-          !FrReq && "ring-2"
-        } transition-all    duration-500 text-white bg-gray-900 rounded-md md:w-[460px]  shadow-lg right-0.5    md:right-2  absolute 
-    ${FrReq ? "max-h-0" : "max-h-96 p-4"}`}
-      >
-        <div className="flex items-center justify-around">
-          <button
-            onClick={() => {
-              setFR_FRREQ("Friend Requests");
-            }}
-            className={`${
-              FR_FRREQ === "Friend Requests" && "ring-2"
-            } p-2 bg-gray-800 rounded-lg mb-4`}
-          >
-            Friend Requests
-          </button>
-          <button
-            onClick={() => {
-              setFR_FRREQ("Friends");
-            }}
-            className={`${
-              FR_FRREQ === "Friends" && "ring-2"
-            } p-2 bg-gray-800 rounded-lg mb-4`}
-          >
-            Friends
-          </button>
-          <button
-            onClick={() => {
-              setFR_FRREQ("Sent");
-            }}
-            className={`${
-              FR_FRREQ === "Sent" && "ring-2"
-            } p-2 bg-gray-800 rounded-lg mb-4`}
-          >
-            Sent
-          </button>
-        </div>
-        {FRS_FRREQ()}
-      </nav>
-      {/* data Searche */}
-      <nav
-        onClick={() => {setSearch("");}}
-        className={`fixed  w-full flex justify-center ${search === ""
-            ? "opacity-0 pointer-events-none"
-            : "opacity-100 pointer-events-auto"
-        } transition-opacity duration-500 ease-in-out`}
-      >
-        <div
-          className={`bg-black opacity-70 w-full  min-h-screen  rounded-b-md shadow-lg ${
-            search === "" ? "max-h-0" : "max-h-96"
-          } transition-all duration-500 ease-in-out`}
-        ></div>
-      </nav>
-      <div
-        className={`fixed top-20 left-1/2 w-full transform -translate-x-1/2 bg-white rounded-lg shadow-lg ${
-          search === ""
-            ? "opacity-0 scale-95 pointer-events-none"
-            : "opacity-100 scale-100 pointer-events-auto"
-        } transition-all duration-500 ease-in-out max-w-lg max-h-72 overflow-y-auto`}
-      >
-        <div className="p-3">
-          {shuffledUserDetails.length > 0 ? (
-            <div className="space-y-2">
-              {shuffledUserDetails.map((user) => (
-                <div
-                  onClick={() => {
-                    setSearch("");
-                    setSetting(true);
-                      setNotification(true);
-                      setFrReq(true);
-                    router.push(`/${user.username}`);
-                  }}
-                  key={user._id}
-                  className="flex items-center border hover:scale-95 duration-300 bg-gray-100 cursor-pointer p-2 rounded-lg shadow-sm hover:shadow-md ring-1"
-                >
-                  <Image
-                    width={50}
-                    height={50}
-                    src={user.urlimage}
-                    alt={user.fullname}
-                    className="w-12 h-12 min-w-[48px] aspect-square object-cover rounded-full mr-3 border-2 border-gray-200"
-                  />
-                  <div className="flex-1">
-                    <p
-                      className="text-black text-xs"
-                      dangerouslySetInnerHTML={{
-                        __html: `@${safeHighlightText(user.username)}`,
-                      }}
-                    ></p>
-                    <p
-                      className="text text-xs"
-                      dangerouslySetInnerHTML={{
-                        __html: safeHighlightText(user.email),
-                      }}
-                    ></p>
-                    <p
-                      className="text text-xs"
-                      dangerouslySetInnerHTML={{
-                        __html: safeHighlightText(user.category),
-                      }}
-                    ></p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-3 text-center text-gray-500">No users found</div>
+          {user.username && (
+            <Link
+              href={`/${user.username}`}
+              onClick={() => setSetting(true)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition font-medium"
+            >
+              <ExternalLink size={16} className="text-slate-400" />
+              <span>View Live CV</span>
+            </Link>
           )}
+
+          {user.role === "admin" && (
+            <Link
+              href="/admin"
+              onClick={() => setSetting(true)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition font-medium"
+            >
+              <Shield size={16} className="text-amber-500" />
+              <span>Admin Panel</span>
+            </Link>
+          )}
+
+          <Link
+            href="/contact"
+            onClick={() => setSetting(true)}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition font-medium"
+          >
+            <MessageSquare size={16} className="text-slate-400" />
+            <span>Contact Us</span>
+          </Link>
+
+          <div className="border-t border-slate-100 my-1.5 pt-1.5">
+            <button
+              onClick={Logout}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 transition font-medium text-left"
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

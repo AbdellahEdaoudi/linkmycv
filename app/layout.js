@@ -3,39 +3,129 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import { MyProvider } from "./context/MyContext";
 import { ToastProvider } from "./components/toast";
-import NextAuthProvider from "./providers/NextAuthProvider";
-import {Metadata} from "./data/metadata"
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 
-const prompt = Prompt({ subsets: ['latin'], weight: '400' });
+const prompt = Prompt({ subsets: ["latin"], weight: "400" });
 
-export const metadata = Metadata ;
+export const metadata = {
+  metadataBase: new URL("https://linkmycv.site"),
+  title: "linkmycv — Your CV in a Single Link",
+  description:
+    "Create, manage, and share your professional digital CV with a single link and instant QR code. Keep your career up-to-date and impress employers anywhere.",
+  keywords: [
+    "linkmycv",
+    "Resume",
+    "Portfolio",
+    "CV Link",
+    "Bio Link",
+    "digital Resume",
+    "online presence",
+    "personal branding",
+    "customizable profiles",
+    "QR code generator",
+    "portfolio showcase",
+  ],
+  authors: [{ name: "Abdellah Edaoudi" }],
+  creator: "Abdellah Edaoudi",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "linkmycv — Your CV in a Single Link",
+    description:
+      "Create, manage, and share your professional digital CV with a single link and instant QR code. Keep your career up-to-date and impress employers anywhere.",
+    url: "https://linkmycv.site",
+    siteName: "linkmycv",
+    images: [
+      {
+        url: "/logo.png",
+        width: 408,
+        height: 408,
+        alt: "linkmycv logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "linkmycv — Your CV in a Single Link",
+    description:
+      "Create, manage, and share your professional digital CV with a single link and instant QR code. Keep your career up-to-date and impress employers anywhere.",
+    images: ["/logo.png"],
+  },
+  alternates: {
+    canonical: "https://linkmycv.site",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "lrUMetd9EhC65WgbGR59FVNlrRznFFrls_hepjYZacA",
+  },
+  other: {
+    "theme-color": "#ffffff",
+    "application-name": "linkmycv",
+    "instagram:site": "https://www.instagram.com/linkmycv",
+    "image_src": "/logo.png",
+  },
+};
+
 export const viewport = {
-  width: 'device-width',
-  initialScale: 0.9,
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "LinkMyCV",
+    "url": "https://linkmycv.site",
+    "description": "Create, manage, and share your professional digital CV with a single link and instant QR code. Keep your career up-to-date and impress employers anywhere.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "image": "https://linkmycv.site/logo.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Abdellah Edaoudi"
+    }
+  };
+
   return (
-      <html className="scroll-smooth" lang="en">
+    <html className="scroll-smooth" data-scroll-behavior="smooth" lang="en">
       <head>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2614061557764113"
-      crossOrigin="anonymous"></script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
-        <body className={`${prompt.className} min-h-screen scrollbar-none bg-gray-800 g-gradient-to-r from-blue-500 to-purple-500`}>
-        <NextAuthProvider>
-          <MyProvider>
-            <ToastProvider>
-                <div className="sticky top-0 z-50 ">
-                    <Navbar />
-                </div>
-                {children}
-            </ToastProvider>
+      <body className={`${prompt.className} min-h-screen bg-slate-50 text-slate-900 antialiased`}>
+        <MyProvider>
+          <ToastProvider>
+            <div className="sticky top-0 z-50">
+              <Navbar />
+            </div>
+            {children}
+          </ToastProvider>
         </MyProvider>
-        </NextAuthProvider>
         <Analytics />
-        </body>
-      </html>
+      </body>
+    </html>
   );
 }

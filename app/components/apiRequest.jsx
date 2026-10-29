@@ -9,34 +9,35 @@ import Cookies from 'js-cookie';
 // focusing on checking the validity of the token and refreshing it when it expires. 
 
 export const apiRequest = async (config) => {
-    try {
-      const token = Cookies.get("token");
-      if (token) {
+  try {
+    const token = Cookies.get("token");
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+    const response = await axios(config);
+    return response;
+  } catch (error) {
+    if (error.response && error.response.status === 403) {
+      try {
+        const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "https://server-linkmycv.vercel.app";
+        const refreshResponse = await axios.post(`${SERVER_URL}/refresh`, {}, {
+          withCredentials: true,
+        });
+        const newToken = refreshResponse.data.accessToken;
+        Cookies.set("token", newToken);
         config.headers = {
           ...config.headers,
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${newToken}`,
         };
+        return await axios(config);
+      } catch (refreshError) {
+        throw refreshError;
       }
-      const response = await axios(config);
-      return response;
-    } catch (error) {
-      if (error.response && error.response.status === 403) {
-        try {
-          const refreshResponse = await axios.post("http://localhost:9999/refresh", {}, {
-            withCredentials: true,
-          });
-          const newToken = refreshResponse.data.accessToken;
-          Cookies.set("token", newToken);
-          config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
-          return await axios(config);
-        } catch (refreshError) {
-          throw refreshError;
-        }
-      } else {
-        throw error;
-      }
+    } else {
+      throw error;
     }
-  };
+  }
+};
